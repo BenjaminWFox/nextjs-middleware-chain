@@ -1,0 +1,17 @@
+{
+  "name": "next-chainable-middleware",
+  "version": "1.0.0",
+  "description": "Customizable chainable middleware for Next.js",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "next",
+    "nextjs",
+    "react",
+    "middleware"
+  ],
+  "author": "Ben Fox",
+  "license": "ISC"
+}

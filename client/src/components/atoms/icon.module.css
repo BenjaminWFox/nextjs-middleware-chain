@@ -1,0 +1,23 @@
+.base {
+  vertical-align: middle;
+}
+
+.xs {
+  min-width: calc(var(--base-unit) * 1.5);
+}
+
+.sm {
+  min-width: calc(var(--base-unit) * 2);
+}
+
+.md {
+  min-width: calc(var(--base-unit) * 3);
+}
+
+.lg {
+  min-width: calc(var(--base-unit) * 4);
+}
+
+.invert {
+  filter: invert(1);
+}

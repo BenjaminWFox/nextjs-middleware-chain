@@ -1,0 +1,28 @@
+.horizontal {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  align-items: center;
+}
+
+.space-between > *:not(:first-child) {
+  margin-left: var(--spacing-md);
+}
+
+.flush-width {
+  width: calc(100% + var(--layout-lg));
+  margin-left: calc(var(--layout-md) * -1);
+  margin-right: calc(var(--layout-md) * -1);
+}
+
+.flush-top {
+  margin-top: calc(var(--layout-md) * -1);
+}
+
+.flush-bottom {
+  margin-bottom: calc(var(--layout-md) * -1);
+}
+
+.underline, .underline a {
+  text-decoration: underline;
+}

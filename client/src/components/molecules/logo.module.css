@@ -1,0 +1,13 @@
+.logo {
+  padding: var(--spacing-sm) var(--spacing-md);
+  color: #fff;
+  background-color: steelblue;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  border-radius: 1rem;
+}
+
+.logo > *:first-child {
+  margin-right: var(--spacing-sm);
+}
