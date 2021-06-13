@@ -3,6 +3,9 @@ import '../styles/utility.css'
 import Head from 'next/head'
 import React from 'react'
 import { ADDisplayContext, display as ADDisplay, colors } from '../data/context'
+import middleware from '../middleware'
+
+// middleware.init()
 
 function MyApp({ Component, pageProps }) {
   const [display, setDisplay] = React.useState(ADDisplay)

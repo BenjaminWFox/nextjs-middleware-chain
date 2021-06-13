@@ -13,5 +13,8 @@
     "middleware"
   ],
   "author": "Ben Fox",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "typescript": "^4.3.2"
+  }
 }
