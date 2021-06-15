@@ -14,7 +14,8 @@
   ],
   "author": "Ben Fox",
   "license": "ISC",
-  "dependencies": {
+  "dependencies": {},
+  "devDependencies": {
     "typescript": "^4.3.2"
   }
 }

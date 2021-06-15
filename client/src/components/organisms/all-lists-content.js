@@ -11,11 +11,11 @@ export default function AllListsContent({categories}) {
     <div style={{ padding: 'var(--spacing-xl) var(--spacing-lg)'}}>
       {categories.map(category => {
         return (
-          <div>
+          <div key={categories.name}>
             {category.name}
             <ul>
               {category.lists.map(list => (
-                <li>
+                <li key={list.name}>
                   <BlockLink href={`/category/${category.name}/list/${list.name}`}>{list.name}</BlockLink>
                 </li>
               ))}
