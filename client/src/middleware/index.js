@@ -42,7 +42,7 @@ const decorate = (context) => {
   decoratedReq._ncm = _ncm
   // decoratedReq._ncm.id = uuidv4()
 
-  return {fn, name: null, req: decoratedReq, res}
+  return {fn, name, req: decoratedReq, res}
 }
 
 const shortCircuitApi = (context) => {
