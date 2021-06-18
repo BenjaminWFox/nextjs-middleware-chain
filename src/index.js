@@ -1,11 +1,50 @@
+const middlewareAsyncInternals = () => ({
+  run: [],
+  // tying it all together:
+  finish: function (finalFunc, finalFuncName) {
+    console.log('FINISH Asnyc:')
+
+    return async (originalRequest, originalResponse) => {
+      console.log('FINSIH RETURN Asnyc:')
+      let req = originalRequest
+      let res = originalResponse
+      let fn = finalFunc
+      let name = finalFuncName
+
+      let keepRunning = true
+
+      for (const withFn of this.run) {
+        if (withFn !== null) {
+          ({req, res, fn, name} = await withFn({fn, name, req, res}))
+
+          if (!req || !res || !fn || !name) {
+            if (res) {
+              res.status(500).json({error: 'missing property'})
+
+              return null
+            }
+          }
+        }
+      }
+
+      if (keepRunning) fn(req, res);
+    };
+  }
+})
+
 const middlewareInternals = (req, res) => ({
   run: [],
   // tying it all together:
   finish: function (fn, name) {
+    console.log('FINISH:')
+
     return (req, res) => {
+      console.log('FINSIH RETURN:')
       let keepRunning = true
+
       for (const withFn of this.run) {
         if (withFn !== null) {
+          console.log('Run Fn')
           keepRunning = withFn({fn, name, req, res});
 
           if (!keepRunning) {
@@ -19,14 +58,63 @@ const middlewareInternals = (req, res) => ({
   }
 })
 
+function uuidv4() {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+    return v.toString(16);
+  });
+}
+
+/**
+ * @typedef MiddlewareInternals
+ * @type {object}
+ * @property {array}      run       Array of fnName functions to be run
+ * @property {function}   finish    
+ * @property {functions}  [fnName]  
+ */
+
+/**
+ * @typedef ContextObject
+ * @type {object}
+ * @property {function} fn    The api function 
+ * @property {string}   name  The name of the api function 
+ * @property {object}   req   Node http request object
+ * @property {object}   re2   Node http response object
+ */
+
+/**
+ * @typedef MiddlewareFunction
+ * @type {function}
+ * @property {ContextObject}  context   object containing the context
+ * @returns {ContextObject}
+ */
+
+/**
+ * @typedef MiddlewareOptions
+ * @type {object}
+ * @property {bool} useChainOrder       Should chained functions be run in chain order (vs initial creation order). Default: TRUE
+ * @property {bool} useAsyncMiddleware  Should middleware functions be able to run asynchronously? Default: FALSE
+ */
+
+/**
+ * This is run once on creation. It return a 
+ * @param {object} fnsObj   A collection of functions
+ * @param {object} options  An object options
+ * @returns 
+ */
 export const createMiddleware = (fnsObj, options) => {
+  console.log('createMiddleware start')
+
   const obj = fnsObj
   const fns = Object.keys(fnsObj)
-  const mw = middlewareInternals()
+  const mw = options.useAsyncMiddleware ?  middlewareAsyncInternals() : middlewareInternals()
 
   fns.forEach((fn, i) => {
+    mw.id = uuidv4()
     mw.run.push(null)
     mw[fn] = function() {
+      console.log('createMiddleware building functions', this)
+
       mw.run[i] = obj[fn]
 
       return this

@@ -1,4 +1,5 @@
 import BannerImage from '../molecules/banner-image'
+import Link from "next/link"
 
 export default function IndexContent({ content, children }) {
   return <div className="organism">
@@ -8,5 +9,11 @@ export default function IndexContent({ content, children }) {
         title="Welcome to RAIJ"
         subtitle="Make Lists. Soothe the Rage." />
       <h3>This would be some homepage content!</h3>
+      <div>
+        <ul>
+          <li><Link href="/api-route">API Route Test Page</Link></li>
+          <li><Link href="/ssr-route">SSR Route Test Page</Link></li>
+        </ul>
+      </div>
     </div>
 }
