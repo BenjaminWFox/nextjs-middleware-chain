@@ -1,38 +1,40 @@
-const middlewareAsyncInternals = () => ({
-  run: [],
-  // tying it all together:
-  finish: function (finalFunc, finalFuncName) {
-    console.log('FINISH Asnyc:')
+const middlewareAsyncInternals = function middlewareAsyncInternals() {
+  return {
+    run: [],
+    // tying it all together:
+    finish: function (finalFunc, finalFuncName) {
+      console.log('FINISH Asnyc:')
 
-    return async (originalRequest, originalResponse) => {
-      console.log('FINSIH RETURN Asnyc:')
-      let req = originalRequest
-      let res = originalResponse
-      let fn = finalFunc
-      let name = finalFuncName
+      return async (originalRequest, originalResponse) => {
+        console.log('FINSIH RETURN Asnyc:')
+        let req = originalRequest
+        let res = originalResponse
+        let fn = finalFunc
+        let name = finalFuncName
 
-      let keepRunning = true
+        let keepRunning = true
 
-      for (const withFn of this.run) {
-        if (withFn !== null) {
-          ({req, res, fn, name} = await withFn({fn, name, req, res}))
+        for (const withFn of this.run) {
+          if (withFn !== null) {
+            ({req, res, fn, name} = await withFn({fn, name, req, res}))
 
-          if (!req || !res || !fn || !name) {
-            if (res) {
-              res.status(500).json({error: 'missing property'})
+            if (!req || !res || !fn || !name) {
+              if (res) {
+                res.status(500).json({error: 'missing property'})
 
-              return null
+                return null
+              }
             }
           }
         }
-      }
 
-      if (keepRunning) fn(req, res);
-    };
+        if (keepRunning) fn(req, res);
+      };
+    }
   }
-})
+}
 
-const middlewareInternals = (req, res) => ({
+const middlewareInternals = () => ({
   run: [],
   // tying it all together:
   finish: function (fn, name) {
