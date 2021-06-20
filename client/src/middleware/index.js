@@ -82,7 +82,6 @@ const middleware = [
   fnB,
   fnC,
   fnD,
-  fnEndWithRes,
   fnEndWithEnd,
   unauthorized,
   decorate,
