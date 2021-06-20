@@ -31,7 +31,7 @@ export default function Home() {
         // fetch('http://localhost:3001/api/apiRoute/apiFetch'),
       ])
 
-      console.into('Responses', responses)
+      console.info('Responses', responses)
     }
 
     getUser()
