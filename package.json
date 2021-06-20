@@ -8,6 +8,11 @@
     "test.watch": "jest --watch",
     "lint": "eslint src/"
   },
+  "homepage": "https://github.com/BenjaminWFox/nextjs-middleware-chain",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/BenjaminWFox/nextjs-middleware-chain.git"
+  },
   "keywords": [
     "next",
     "nextjs",
