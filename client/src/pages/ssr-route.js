@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react'
 import Index from '../components/pages/index'
 import middleware from '../middleware'
 import ssrImport from './api/ssrRoute/ssrImport'
 
-export default function Home({ data }) {
+export default function Home() {
   return (<Index />)
 }
 
-async function getProps({req, res}) {
-  console.log('SSR GET PROPS')
+async function getProps({ req, res }) {
+  console.info('SSR GET PROPS')
 
   const responses = await Promise.all([
     ssrImport(req, res),
@@ -25,7 +24,7 @@ async function getProps({req, res}) {
     // ssrImport(req, res),
   ])
 
-  console.log('Responses', responses)
+  console.info('Responses', responses)
 
   return {
     props: {
@@ -41,6 +40,6 @@ export const getServerSideProps = middleware()
 // .unauthorized()
 // .fnD()
 // .fnA()
-.decorate()
-.common()
-.finish(getProps, 'SSR Import') 
+  .decorate()
+  .common()
+  .finish(getProps, 'SSR Import')

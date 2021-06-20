@@ -1,6 +1,6 @@
+import Link from 'next/link'
 import styles from './logo.module.css'
 import Icon from '../atoms/icon'
-import Link from 'next/link'
 
 export default function Logo() {
   return (

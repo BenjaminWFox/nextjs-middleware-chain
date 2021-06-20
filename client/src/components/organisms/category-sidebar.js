@@ -1,7 +1,7 @@
-import SidebarNavigation from '../../components/organisms/sidebar-navigation'
+import SidebarNavigation from './sidebar-navigation'
 import Button from '../atoms/button'
 
-export default function CategorySidebar({category, name, description, sidenav}) {
+export default function CategorySidebar({ category, name, description, sidenav }) {
   const handleClick = () => {
     alert('Add Category Functionality not implemented!')
   }

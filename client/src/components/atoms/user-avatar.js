@@ -1,5 +1,5 @@
-import styles from './user-avatar.module.css'
 import Link from 'next/link'
+import styles from './user-avatar.module.css'
 
 export default function UserAvatar({ size, type, display }) {
   return (

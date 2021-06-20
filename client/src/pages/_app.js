@@ -3,9 +3,6 @@ import '../styles/utility.css'
 import Head from 'next/head'
 import React from 'react'
 import { ADDisplayContext, display as ADDisplay, colors } from '../data/context'
-import middleware from '../middleware'
-
-// middleware.init()
 
 function MyApp({ Component, pageProps }) {
   const [display, setDisplay] = React.useState(ADDisplay)
@@ -23,10 +20,10 @@ function MyApp({ Component, pageProps }) {
         <title>Practical Atomic Design for Development</title>
         <link rel="icon" href="/favicon.ico" />
       </Head>
-      <ADDisplayContext.Provider value={{display, colors, updateDisplay}}>
-          <ADDisplayContext.Consumer>
-            {({display, colors}) => (
-              <style global jsx>{`
+      <ADDisplayContext.Provider value={{ display, colors, updateDisplay }}>
+        <ADDisplayContext.Consumer>
+          {({ display, colors }) => (
+            <style global jsx>{`
               body .atom {
                 outline: ${display.atoms ? 'none' : `4px ${colors.atoms} solid`};
                 outline-offset: -3px;
@@ -58,9 +55,9 @@ function MyApp({ Component, pageProps }) {
                 outline-offset: -4px;
               }
             `}</style>
-            )}
-          </ADDisplayContext.Consumer>
-          <Component {...pageProps} />
+          )}
+        </ADDisplayContext.Consumer>
+        <Component {...pageProps} />
       </ADDisplayContext.Provider>
     </>
   )

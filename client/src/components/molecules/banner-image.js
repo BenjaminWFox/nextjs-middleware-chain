@@ -5,7 +5,7 @@ import ImageWithOverlay from '../atoms/image-with-overlay'
 export default function BannerImage({ src, title, subtitle, height }) {
   return (
     <div
-      style={{height}}
+      style={{ height }}
       className={[styles.banner, 'flush-width', 'flush-top', 'molecule'].join(' ')}>
       <ImageWithOverlay title={title} subtitle={subtitle} src={src}/>
     </div>

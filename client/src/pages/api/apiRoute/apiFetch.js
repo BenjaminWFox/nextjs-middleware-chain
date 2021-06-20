@@ -1,7 +1,7 @@
 import middleware from '../../../middleware'
 
 const apiFetch = (req, res) => {
-  console.log('Running apiFetch', req._nmc)
+  console.info('Running apiFetch', req._nmc)
 
   res.status(200).json({ data: 'API Fetch Return' })
 }
@@ -11,6 +11,6 @@ export default middleware()
 // .unauthorized()
 // .fnD()
 // .fnA()
-.decorate()
-.common()
-.finish(apiFetch, 'API Fetch')
+  .decorate()
+  .common()
+  .finish(apiFetch, 'API Fetch')
