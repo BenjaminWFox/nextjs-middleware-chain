@@ -7,54 +7,6 @@ function uuidv4() {
   });
 }
 
-const protect = (context) => {
-  console.log('Running protection...', context.name)
-  const { req, res } = context
-
-  if (req.body.username) {
-    console.log('SEND RES')
-    res.status(401).json({ message: 'unauthorized' })
-
-    return null
-  }
-  else {
-    return context
-  }
-}
-
-const log = async (context) => {
-  console.log('Running logging...', context.name)
-
-  const result = await new Promise(resolve => setTimeout(resolve, Math.random() * 1000));
-
-  console.log('moving on...')
-
-  return context
-}
-
-const decorate = (req, res, next) => {
-  console.log('Running decoration...')
-
-  req._nmc.hello = 'world'
-  req._nmc.secondId = uuidv4()
-
-  return next()
-}
-
-const shortCircuitApi = (context) => {
-  const {res} = context
-
-  res.status(500).json({ message: 'Could not continue.' })
-
-  return null
-}
-
-const shortCircuitSsr = (context) => {
-  console.log('Short Circuit SSR')
-  
-  return { message: 'Could not continue.' }
-}
-
 const fnA = (req, res, next) => {
   console.log('Running A', next)
 
@@ -87,8 +39,13 @@ const fnEndWithEnd = (req, res, next) => {
   return next('end')
 }
 
-const fnEndWithRes = (req, res, next) => {
+const decorate = (req, res, next) => {
+  console.log('Running decoration...')
 
+  req._nmc.hello = 'world'
+  req._nmc.secondId = uuidv4()
+
+  return next()
 }
 
 const unauthorized = (req, res, next) => {
