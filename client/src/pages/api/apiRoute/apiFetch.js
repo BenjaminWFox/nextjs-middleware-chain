@@ -1,7 +1,7 @@
 import middleware from '../../../middleware'
 
 const apiFetch = (req, res) => {
-  console.info('Running apiFetch', req._nmc)
+  console.info('Running apiFetch', req.nmc)
 
   res.status(200).json({ data: 'API Fetch Return' })
 }

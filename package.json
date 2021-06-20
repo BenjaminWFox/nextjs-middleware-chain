@@ -17,6 +17,7 @@
   "author": "Ben Fox",
   "license": "ISC",
   "dependencies": {
+    "@babel/polyfill": "^7.12.1",
     "next": "^11.0.0"
   },
   "jest": {

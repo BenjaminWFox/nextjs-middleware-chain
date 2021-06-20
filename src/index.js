@@ -9,8 +9,6 @@ import { Middleware, DEFAULT_OPTIONS } from './middleware'
  * @returns A factory function used to create new instances of the Middleware class
  */
 const middlewareFactoryFactory = function middlewareFactoryFactory(fnsArray, globalOptions) {
-  console.info('Available Functions:', fnsArray)
-
   // Inline options will overwrite global options
   return (inlineOptions) => new Middleware(fnsArray, globalOptions, inlineOptions)
 }

@@ -1,16 +1,4 @@
-/**
- * This is really only used for testing.
- *
- * @returns a guid-like string that might not be quite as random as a true guid
- */
-/* eslint-disable */
-function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
-/* eslint-enable */
+import { uuidv4 } from './uuid'
 
 /**
 * @typedef MiddlewareOptions
@@ -21,6 +9,7 @@ function uuidv4() {
 export const DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
+  reqPropName: 'nmc',
 }
 
 export class Middleware {
@@ -35,9 +24,6 @@ export class Middleware {
     this.finish = function finish(finalFunc, finalFuncName) {
       // The run array may have null values depending on the chain & configured options.
       this.run = this.run.filter((fn) => !!fn)
-
-      console.info('Finishing MW for id: ', this.id)
-      console.info('  -  Functions to run:', this.run)
       const { id } = this
 
       return async (pReq, pRes) => {
@@ -54,7 +40,7 @@ export class Middleware {
         const req = {
           ...(pRes ? pReq : pReq.req),
           // Add a lib-specific decoration to the request
-          _nmc: {
+          [DEFAULT_OPTIONS.reqPropName]: {
             id,
             name: finalFuncName,
             type,
@@ -109,8 +95,6 @@ export class Middleware {
             result = await this.run[runIndex](req, res, runNext)
           }
 
-          console.info(result)
-
           if (!result || (runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed)) {
             runnerState = RUNNER_STATES.ended
 
@@ -120,8 +104,6 @@ export class Middleware {
           runIndex += 1
         }
 
-        console.info('Finished with function runner', this.id)
-
         if (runnerState === RUNNER_STATES.completed) {
           return type === 'api' ? finalFunc(req, res) : finalFunc({ req, res })
         }
@@ -130,8 +112,11 @@ export class Middleware {
       }
     }
 
-    // this will be run when there is not current instance of
-    // middleware for a given route
+    // This will be run when there is not current instance of
+    // middleware for a given route. Depending on whether
+    // `useChainOrder` is true, functions will be added to the
+    // end of the `run` array, or inserted into the `run` array
+    // in the order they are present in the `fnsArray` array.
     fnsArray.forEach((fn, i) => {
       const fnName = fn.name
 
@@ -139,7 +124,6 @@ export class Middleware {
 
       // eslint-disable-next-line func-names
       this[fnName] = function() {
-        console.info('options', this.options)
         if (this.options.useChainOrder) {
           this.run.push(fnsArray[i])
         }
