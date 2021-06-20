@@ -15,13 +15,12 @@ const getNextFn = (arr, i) => {
 
 const middlewareAsyncInternals = function middlewareAsyncInternals() {
   return {
+    id: uuidv4(),
     run: [],
-    // tying it all together:
     finish: function (finalFunc, finalFuncName) {
-      console.log('FINISH Asnyc:')
+      console.log('Finishing MW for id', this.id)
 
       return async (pReq, pRes) => {
-        console.log('FINSIH RETURN Asnyc:')
         const res = pRes
         const req = {
           ...pReq,
@@ -31,49 +30,31 @@ const middlewareAsyncInternals = function middlewareAsyncInternals() {
           }
         }
         let runIndex = 0
+        let escape = false
         
         const next = async (arg) => {
           if (arg) {
-            console.log('Received argument from middleware', arg)
+            switch (arg) {
+              case 'route':
+                escape = true;
+              default:
+                break
+            }
           }
 
           const { runFn, nextIndex } = getNextFn(this.run, runIndex)
 
           runIndex = nextIndex
 
-          if (runFn) {
+          if (runFn && !escape) {
             await runFn(req, res, next)
-          }
-          else {
-            finalFunc(req, res)
           }
         }
 
         await next()
 
-        // for (let i = 0; i < this.run.length; i += 1) {
-        //   console.log('Loop...', i, this.run, this.run.length)
-
-        //   const withFn = this.run[i]
-
-        //   if (withFn !== null) {
-        //     const result = await withFn(req, res, next)
-
-        //     console.log('result', result)
-        //     // ({req, res, fn, name} = await withFn({fn, name, req, res}))
-
-        //     // if (!req || !res || !fn || !name) {
-        //     //   if (res) {
-        //     //     res.status(500).json({error: 'missing property'})
-
-        //     //     return null
-        //     //   }
-        //     // }
-        //   }
-        // }
-
-        // if (keepRunning) fn(req, res);
-      };
+        return finalFunc(req, res)
+      }
     }
   }
 }
@@ -149,7 +130,7 @@ function uuidv4() {
  * @returns 
  */
 export const createMiddleware = (fnsArray, options) => {
-  console.log('createMiddleware start')
+  console.log('START createMiddleware')
 
   // const obj = fnsObj
   // const fns = Object.keys(fnsObj)
