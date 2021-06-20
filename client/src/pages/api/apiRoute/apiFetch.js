@@ -8,6 +8,7 @@ const apiFetch = (req, res) => {
 
 export default middleware()
 .fnB()
+.unauthorized()
 .fnD()
 .fnA()
 .finish(apiFetch, 'API Fetch')

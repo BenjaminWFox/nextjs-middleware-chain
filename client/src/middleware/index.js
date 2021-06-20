@@ -62,31 +62,50 @@ const shortCircuitSsr = (context) => {
 const fnA = (req, res, next) => {
   console.log('Running A', next)
 
-  next('Arg from A')
+  return next('A')
 }
 
 const fnB = async (req, res, next) => {
   console.log('Running B', next)
 
   const result = await new Promise(resolve => setTimeout(resolve, 2000));
-
-  next()
+  
+  return next('B')
 }
 
 const fnC = (req, res, next) => {
   console.log('Running C', next)
 
-  next()
+  next('C')
 }
 
 const fnD = (req, res, next) => {
-  console.log('Running D', next, req._nmc)
+  console.log('Running D', next)
 
-  next()
+  return next('D')
+}
+
+const fnEndWithEnd = (req, res, next) => {
+  console.log('Running fnEndWithEnd', next)
+
+  return next('end')
 }
 
 const fnEndWithRes = (req, res, next) => {
-  next('end')
+
+}
+
+const unauthorized = (req, res, next) => {
+  if (req._nmc.type === 'api') {
+    res.status(401).json({error: 'unauthorize', message: 'access denied'})
+  } else if (req._nmc.type === 'ssr') {
+    return next('end', {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    })
+  }
 }
 
 const middleware = [
@@ -95,6 +114,8 @@ const middleware = [
   fnC,
   fnD,
   fnEndWithRes,
+  fnEndWithEnd,
+  unauthorized,
 ]
 
 const options = {
