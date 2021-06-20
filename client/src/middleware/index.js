@@ -32,17 +32,13 @@ const log = async (context) => {
   return context
 }
 
-const decorate = (context) => {
+const decorate = (req, res, next) => {
   console.log('Running decoration...')
-  const {fn, name, req, res} = context
-  const decoratedReq = req
 
-  // decoratedReq.ncm.add({ hello: 'world', id: uuidv4() })
-  const _ncm = { hello: 'world', id: uuidv4() }
-  decoratedReq._ncm = _ncm
-  // decoratedReq._ncm.id = uuidv4()
+  req._nmc.hello = 'world'
+  req._nmc.secondId = uuidv4()
 
-  return {fn, name, req: decoratedReq, res}
+  return next()
 }
 
 const shortCircuitApi = (context) => {
@@ -76,7 +72,7 @@ const fnB = async (req, res, next) => {
 const fnC = (req, res, next) => {
   console.log('Running C', next)
 
-  next('C')
+  return next('C')
 }
 
 const fnD = (req, res, next) => {
@@ -108,6 +104,22 @@ const unauthorized = (req, res, next) => {
   }
 }
 
+const common = async (req, res, next) => {
+  const aRes = fnA(req, res, next)
+  console.log('aRes', aRes)
+
+  const bRes = await fnB(req, res, next)
+  console.log('bRes', bRes)
+
+  const authRes = unauthorized(req, res, next)
+
+  console.log('Finishing common', req._nmc)
+
+  if (authRes) {
+    return authRes
+  }
+}
+
 const middleware = [
   fnA,
   fnB,
@@ -116,6 +128,8 @@ const middleware = [
   fnEndWithRes,
   fnEndWithEnd,
   unauthorized,
+  decorate,
+  common
 ]
 
 const options = {

@@ -37,8 +37,10 @@ async function getProps({req, res}) {
 // export const getServerSideProps = getProps
 
 export const getServerSideProps = middleware()
-.fnB()
-.unauthorized()
-.fnD()
-.fnA()
+// .fnB()
+// .unauthorized()
+// .fnD()
+// .fnA()
+.decorate()
+.common()
 .finish(getProps, 'SSR Import') 
