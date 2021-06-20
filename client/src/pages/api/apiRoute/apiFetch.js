@@ -6,4 +6,5 @@ const apiFetch = (req, res) => {
   res.status(200).json({ data: 'API Fetch Return' })
 }
 
-export default middleware().decorate().protect().log().finish(apiFetch, `API Fetch`)
+export default middleware().fnB().fnD().fnA().finish(apiFetch, 'API Fetch')
+// export default middleware().decorate().protect().log().finish(apiFetch, `API Fetch`)

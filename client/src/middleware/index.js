@@ -59,13 +59,46 @@ const shortCircuitSsr = (context) => {
   return { message: 'Could not continue.' }
 }
 
-const middleware = {
-    protect,
-    log,
-    decorate,
-    shortCircuitApi,
-    shortCircuitSsr,
+const fnA = (req, res, next) => {
+  console.log('Running A', next)
+
+  next('Arg from A')
 }
+
+const fnB = async (req, res, next) => {
+  console.log('Running B', next)
+
+  const result = await new Promise(resolve => setTimeout(resolve, 2000));
+
+  next()
+}
+
+const fnC = (req, res, next) => {
+  console.log('Running C', next)
+
+  next()
+}
+
+const fnD = (req, res, next) => {
+  console.log('Running D', next, req._nmc)
+
+  next()
+}
+
+// const middleware = {
+//     protect,
+//     log,
+//     decorate,
+//     shortCircuitApi,
+//     shortCircuitSsr,
+// }
+const middleware = [
+  fnA,
+  fnB,
+  fnC,
+  fnD,
+]
+
 const options = {
   useChainOrder: true,
   useAsyncMiddleware: true,

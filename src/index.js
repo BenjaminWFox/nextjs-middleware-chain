@@ -1,3 +1,18 @@
+const getNextFn = (arr, i) => {
+  let j = i
+
+  while (true) {
+    if (arr[j]) {
+      return { runFn: arr[j], nextIndex: j +1 }
+    } else if (j === arr.length) {
+      return {}
+    }
+    else {
+      j += 1
+    }
+  }
+}
+
 const middlewareAsyncInternals = function middlewareAsyncInternals() {
   return {
     run: [],
@@ -5,30 +20,59 @@ const middlewareAsyncInternals = function middlewareAsyncInternals() {
     finish: function (finalFunc, finalFuncName) {
       console.log('FINISH Asnyc:')
 
-      return async (originalRequest, originalResponse) => {
+      return async (pReq, pRes) => {
         console.log('FINSIH RETURN Asnyc:')
-        let req = originalRequest
-        let res = originalResponse
-        let fn = finalFunc
-        let name = finalFuncName
+        const res = pRes
+        const req = {
+          ...pReq,
+          _nmc: {
+            name: finalFuncName,
+            type: '',
+          }
+        }
+        let runIndex = 0
+        
+        const next = async (arg) => {
+          if (arg) {
+            console.log('Received argument from middleware', arg)
+          }
 
-        let keepRunning = true
+          const { runFn, nextIndex } = getNextFn(this.run, runIndex)
 
-        for (const withFn of this.run) {
-          if (withFn !== null) {
-            ({req, res, fn, name} = await withFn({fn, name, req, res}))
+          runIndex = nextIndex
 
-            if (!req || !res || !fn || !name) {
-              if (res) {
-                res.status(500).json({error: 'missing property'})
-
-                return null
-              }
-            }
+          if (runFn) {
+            await runFn(req, res, next)
+          }
+          else {
+            finalFunc(req, res)
           }
         }
 
-        if (keepRunning) fn(req, res);
+        await next()
+
+        // for (let i = 0; i < this.run.length; i += 1) {
+        //   console.log('Loop...', i, this.run, this.run.length)
+
+        //   const withFn = this.run[i]
+
+        //   if (withFn !== null) {
+        //     const result = await withFn(req, res, next)
+
+        //     console.log('result', result)
+        //     // ({req, res, fn, name} = await withFn({fn, name, req, res}))
+
+        //     // if (!req || !res || !fn || !name) {
+        //     //   if (res) {
+        //     //     res.status(500).json({error: 'missing property'})
+
+        //     //     return null
+        //     //   }
+        //     // }
+        //   }
+        // }
+
+        // if (keepRunning) fn(req, res);
       };
     }
   }
@@ -104,20 +148,26 @@ function uuidv4() {
  * @param {object} options  An object options
  * @returns 
  */
-export const createMiddleware = (fnsObj, options) => {
+export const createMiddleware = (fnsArray, options) => {
   console.log('createMiddleware start')
 
-  const obj = fnsObj
-  const fns = Object.keys(fnsObj)
+  // const obj = fnsObj
+  // const fns = Object.keys(fnsObj)
   const mw = options.useAsyncMiddleware ?  middlewareAsyncInternals() : middlewareInternals()
 
-  fns.forEach((fn, i) => {
+  fnsArray.forEach((fn, i) => {
+    const fnName = fn.name
+
     mw.id = uuidv4()
     mw.run.push(null)
-    mw[fn] = function() {
+    mw[fnName] = function() {
       console.log('createMiddleware building functions', this)
 
-      mw.run[i] = obj[fn]
+      if (options.useChainOrder) {
+        mw.run.push(fnsArray[i])
+      } else {
+        mw.run[i] = fnsArray[i]
+      }
 
       return this
     }
