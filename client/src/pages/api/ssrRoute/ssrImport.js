@@ -9,5 +9,3 @@ const ssrImport = async (req, res) => {
 }
 
 export default ssrImport
-
-// export default middleware().log().decorate().protect().finish(ssrImport, `SSR Import`)

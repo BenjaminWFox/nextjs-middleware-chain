@@ -35,7 +35,9 @@ async function getProps({req, res}) {
 }
 
 // export const getServerSideProps = getProps
-console.log('BEGIN', middleware())
 
-export const getServerSideProps = middleware().fnB().fnD().fnA().finish(getProps, 'SSR Import') 
-// middleware().shortCircuitSsr().log().decorate().protect().finish(getProps, 'SSR Import')
+export const getServerSideProps = middleware()
+.fnB()
+.fnD()
+.fnA()
+.finish(getProps, 'SSR Import') 

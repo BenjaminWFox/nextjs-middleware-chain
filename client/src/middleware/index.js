@@ -85,18 +85,16 @@ const fnD = (req, res, next) => {
   next()
 }
 
-// const middleware = {
-//     protect,
-//     log,
-//     decorate,
-//     shortCircuitApi,
-//     shortCircuitSsr,
-// }
+const fnEndWithRes = (req, res, next) => {
+  next('end')
+}
+
 const middleware = [
   fnA,
   fnB,
   fnC,
   fnD,
+  fnEndWithRes,
 ]
 
 const options = {

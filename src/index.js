@@ -31,10 +31,12 @@ const middlewareAsyncInternals = function middlewareAsyncInternals(fnsArray, opt
 
           // in SSR the pReq will actually be the `context` object
           // containing both the `req` and `res` objects
-          const res = pRes ?? pReq.res
+          const res = {
+            ...(pRes ? pRes : pReq.res),
+          }
           const req = {
             // I don't know that I really approve of this
-            ...(pRes ? pReq : pReq.res),
+            ...(pRes ? pReq : pReq.req),
             // Add a lib-specific decoration to the request
             _nmc: {
               id,
@@ -50,6 +52,7 @@ const middlewareAsyncInternals = function middlewareAsyncInternals(fnsArray, opt
               switch (arg) {
                 case 'route':
                   escape = true;
+                  break
                 default:
                   break
               }
@@ -66,7 +69,6 @@ const middlewareAsyncInternals = function middlewareAsyncInternals(fnsArray, opt
   
           await next()
   
-
           return type === 'api' ? finalFunc(req, res) : finalFunc({req, res})
         }
       }
