@@ -1,63 +1,19 @@
-const middlewareAsyncInternals = () => ({
-  run: [],
-  // tying it all together:
-  finish: function (finalFunc, finalFuncName) {
-    console.log('FINISH Asnyc:')
+/**
+ * @typedef MiddlewareOptions
+ * @type {object}
+ * @property {bool} useChainOrder       Should chained functions be run in chain order (vs initial creation order). Default: TRUE
+ * @property {bool} useAsyncMiddleware  Should middleware functions be able to run asynchronously? Default: FALSE
+ */
+ const DEFAULT_OPTIONS = {
+  useChainOrder: true,
+  useAsyncMiddleware: true,
+}
 
-    return async (originalRequest, originalResponse) => {
-      console.log('FINSIH RETURN Asnyc:')
-      let req = originalRequest
-      let res = originalResponse
-      let fn = finalFunc
-      let name = finalFuncName
-
-      let keepRunning = true
-
-      for (const withFn of this.run) {
-        if (withFn !== null) {
-          ({req, res, fn, name} = await withFn({fn, name, req, res}))
-
-          if (!req || !res || !fn || !name) {
-            if (res) {
-              res.status(500).json({error: 'missing property'})
-
-              return null
-            }
-          }
-        }
-      }
-
-      if (keepRunning) fn(req, res);
-    };
-  }
-})
-
-const middlewareInternals = (req, res) => ({
-  run: [],
-  // tying it all together:
-  finish: function (fn, name) {
-    console.log('FINISH:')
-
-    return (req, res) => {
-      console.log('FINSIH RETURN:')
-      let keepRunning = true
-
-      for (const withFn of this.run) {
-        if (withFn !== null) {
-          console.log('Run Fn')
-          keepRunning = withFn({fn, name, req, res});
-
-          if (!keepRunning) {
-            break
-          }
-        }
-      }
-
-      if (keepRunning) fn(req, res);
-    };
-  }
-})
-
+/**
+ * This is really only used for testing.
+ * 
+ * @returns a guid-like string that might not be quite as random as a true guid
+ */
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
     var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -66,123 +22,148 @@ function uuidv4() {
 }
 
 /**
- * @typedef MiddlewareInternals
- * @type {object}
- * @property {array}      run       Array of fnName functions to be run
- * @property {function}   finish    
- * @property {functions}  [fnName]  
+ * This is a factory function factory function.
+ * 
+ * @param {*} fnsArray 
+ * @param {*} globalOptions 
+ * 
+ * @returns A factory function used to create new instances of the Middleware class
  */
+const middlewareAsyncInternals = function middlewareAsyncInternals(fnsArray, globalOptions) {
+  console.log('Available Functions:', fnsArray)
 
-/**
- * @typedef ContextObject
- * @type {object}
- * @property {function} fn    The api function 
- * @property {string}   name  The name of the api function 
- * @property {object}   req   Node http request object
- * @property {object}   re2   Node http response object
- */
+  class Middleware {
+    constructor(inlineOptions) {
+      this.options = {
+        ...DEFAULT_OPTIONS,
+        ...globalOptions,
+        ...inlineOptions,
+      }
+      this.run = []
+      this.id = uuidv4()
+      this.finish = function (finalFunc, finalFuncName) {
+        // The run array may have null values depending on the chain & configured options.
+        this.run = this.run.filter((fn) => !!fn)
 
-/**
- * @typedef MiddlewareFunction
- * @type {function}
- * @property {ContextObject}  context   object containing the context
- * @returns {ContextObject}
- */
+        console.log('Finishing MW for id: ', this.id)
+        console.log('  -  Functions to run:', this.run)
+        const id = this.id
+  
+        return async (pReq, pRes) => {
+          // If the passed response object is undefined we can
+          // infer that this was called from a SSR route.
+          let type = pRes ? 'api' : 'ssr'
 
-/**
- * @typedef MiddlewareOptions
- * @type {object}
- * @property {bool} useChainOrder       Should chained functions be run in chain order (vs initial creation order). Default: TRUE
- * @property {bool} useAsyncMiddleware  Should middleware functions be able to run asynchronously? Default: FALSE
- */
+          // in SSR the pReq will actually be the `context` object
+          // containing both the `req` and `res` objects, so 
+          // `pRes` will be undefined.
+          const res = {
+            ...(pRes ? pRes : pReq.res),
+          }
+          const req = {
+            ...(pRes ? pReq : pReq.req),
+            // Add a lib-specific decoration to the request
+            _nmc: {
+              id,
+              name: finalFuncName,
+              type,
+            }
+          }
+          let runIndex = 0
+          let escape = false
+          const RUNNER_STATES = {
+            running: 'running',
+            ended: 'ended',
+            escaped: 'escaped',
+            handled: 'handled',
+            completed: 'completed',
+          }
+          let runnerState = RUNNER_STATES.running
+
+          /**
+           * This will handle state updates resulting from chain functions
+           * and any pre-complete return values
+           * 
+           * @param {*} arg 
+           * @param {*} payload 
+           * @returns 
+           */
+          const runNext = (arg, payload) => {
+            if (RUNNER_STATES.running) {
+              switch (arg) {
+                case 'route':
+                case 'end':
+                  runnerState = RUNNER_STATES.ended
+
+                  return payload
+                default:
+                  if (runIndex === this.run.length - 1) {
+                    runnerState = RUNNER_STATES.completed
+                  }
+                  return true
+              }
+            }
+          }
+
+          while (runnerState === RUNNER_STATES.running && runIndex < this.run.length) {
+            let result
+            if (!this.options.useAsyncMiddleware) {
+              result = this.run[runIndex](req, res, runNext)
+            } else {
+              result = await this.run[runIndex](req, res, runNext)
+            }
+
+            console.log(result)
+
+            if (!result || (runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed)) {
+              runnerState = RUNNER_STATES.ended
+
+              return result
+            }
+
+            runIndex += 1
+          }
+
+          console.log('Finished with function runner', this.id)
+  
+          if (runnerState === RUNNER_STATES.completed) {
+            return type === 'api' ? finalFunc(req, res) : finalFunc({req, res})
+          }
+        }
+      }
+
+      // This will be run when there is not current instance of 
+      // middleware for a given route
+      fnsArray.forEach((fn, i) => {
+        const fnName = fn.name
+        this.run.push(null)
+        this[fnName] = function() {
+          console.log('options', this.options)
+          if (this.options.useChainOrder) {
+            this.run.push(fnsArray[i])
+          } else {
+            this.run[i] = fnsArray[i]
+          }
+    
+          return this
+        }
+      })
+    }
+  }
+
+  // Inline options will overwrite global options
+  return (inlineOptions) => new Middleware(inlineOptions)
+}
 
 /**
  * This is run once on creation. It return a 
- * @param {object} fnsObj   A collection of functions
- * @param {object} options  An object options
+ * @param {object} fnsArray       A collection of functions
+ * @param {MiddlewareOptions} globalOptions  An object options
  * @returns 
  */
-export const createMiddleware = (fnsObj, options) => {
-  console.log('createMiddleware start')
+export const createMiddleware = (fnsArray, globalOptions) => {
+  console.log('')
+  console.log('START createMiddleware')
 
-  const obj = fnsObj
-  const fns = Object.keys(fnsObj)
-  const mw = options.useAsyncMiddleware ?  middlewareAsyncInternals() : middlewareInternals()
-
-  fns.forEach((fn, i) => {
-    mw.id = uuidv4()
-    mw.run.push(null)
-    mw[fn] = function() {
-      console.log('createMiddleware building functions', this)
-
-      mw.run[i] = obj[fn]
-
-      return this
-    }
-  })
-
-  return () => mw
+  return middlewareAsyncInternals(fnsArray, globalOptions)
 }
-
-export const configureMiddleware = () => {
-  
-}
-
-// /**
-//  * Factory to produce a 'withMiddleware' object
-//  */
-//  export default () => ({
-//   // middlewares will insert themselves into the array
-//   // based on their specific priority:
-//   run: [null, null, null],
-
-//   // Primary middleware functions:
-//   withProtect: (fn, name, req, res) => {
-//     // console.log("Run protect");
-
-//     return { fn, name, req, res };
-//   },
-//   withDecorate: (fn, name, req, res) => {
-//     // console.log("Run decorate");
-
-//     req.extra = { prop: "hello" };
-
-//     return { fn, name, req, res };
-//   },
-//   withLog: (fn, name, req, res) => {
-//     // console.log("Finally running log...");
-
-//     return { fn, name, req, res };
-//   },
-
-//   // exposed, chainable functions:
-//   protect: function () {
-//     this.run[0] = this.withProtect;
-
-//     return this;
-//   },
-//   decorate: function () {
-//     this.run[1] = this.withDecorate;
-
-//     return this;
-//   },
-//   log: function () {
-//     this.run[2] = this.withLog;
-
-//     return this;
-//   },
-
-//   // tying it all together:
-//   finish: function (fn, name) {
-//     return (req, res) => {
-//       this.run.forEach((withFn) => {
-//         if (withFn !== null) {
-//           withFn(fn, name, req, res);
-//         }
-//       });
-
-//       fn(req, res);
-//     };
-//   }
-// });
-

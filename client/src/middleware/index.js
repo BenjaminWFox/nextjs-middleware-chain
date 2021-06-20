@@ -7,65 +7,88 @@ function uuidv4() {
   });
 }
 
-const protect = (context) => {
-  console.log('Running protection...', context.name)
-  const { req, res } = context
+const fnA = (req, res, next) => {
+  console.log('Running A', next)
 
-  if (req.body.username) {
-    console.log('SEND RES')
-    res.status(401).json({ message: 'unauthorized' })
-
-    return null
-  }
-  else {
-    return context
-  }
+  return next('A')
 }
 
-const log = async (context) => {
-  console.log('Running logging...', context.name)
+const fnB = async (req, res, next) => {
+  console.log('Running B', next)
 
-  const result = await new Promise(resolve => setTimeout(resolve, Math.random() * 1000));
-
-  console.log('moving on...')
-
-  return context
-}
-
-const decorate = (context) => {
-  console.log('Running decoration...')
-  const {fn, name, req, res} = context
-  const decoratedReq = req
-
-  // decoratedReq.ncm.add({ hello: 'world', id: uuidv4() })
-  const _ncm = { hello: 'world', id: uuidv4() }
-  decoratedReq._ncm = _ncm
-  // decoratedReq._ncm.id = uuidv4()
-
-  return {fn, name, req: decoratedReq, res}
-}
-
-const shortCircuitApi = (context) => {
-  const {res} = context
-
-  res.status(500).json({ message: 'Could not continue.' })
-
-  return null
-}
-
-const shortCircuitSsr = (context) => {
-  console.log('Short Circuit SSR')
+  const result = await new Promise(resolve => setTimeout(resolve, 2000));
   
-  return { message: 'Could not continue.' }
+  return next('B')
 }
 
-const middleware = {
-    protect,
-    log,
-    decorate,
-    shortCircuitApi,
-    shortCircuitSsr,
+const fnC = (req, res, next) => {
+  console.log('Running C', next)
+
+  return next('C')
 }
+
+const fnD = (req, res, next) => {
+  console.log('Running D', next)
+
+  return next('D')
+}
+
+const fnEndWithEnd = (req, res, next) => {
+  console.log('Running fnEndWithEnd', next)
+
+  return next('end')
+}
+
+const decorate = (req, res, next) => {
+  console.log('Running decoration...')
+
+  req._nmc.hello = 'world'
+  req._nmc.secondId = uuidv4()
+
+  return next()
+}
+
+const unauthorized = (req, res, next) => {
+  if (req._nmc.type === 'api') {
+    res.status(401).json({error: 'unauthorize', message: 'access denied'})
+  } else if (req._nmc.type === 'ssr') {
+    return next('end', {
+      redirect: {
+        destination: '/',
+        permanent: false,
+      }
+    })
+  }
+}
+
+const common = async (req, res, next) => {
+  const aRes = fnA(req, res, next)
+  console.log('aRes', aRes)
+
+  const bRes = await fnB(req, res, next)
+  console.log('bRes', bRes)
+
+  const authRes = unauthorized(req, res, next)
+
+  console.log('Finishing common', req._nmc)
+
+  if (authRes) {
+    return authRes
+  }
+}
+
+const middleware = [
+  fnA,
+  fnB,
+  fnC,
+  fnD,
+  fnEndWithRes,
+  fnEndWithEnd,
+  unauthorized,
+  decorate,
+  common
+]
+
 const options = {
   useChainOrder: true,
   useAsyncMiddleware: true,
