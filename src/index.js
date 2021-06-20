@@ -13,50 +13,127 @@ const getNextFn = (arr, i) => {
   }
 }
 
-const middlewareAsyncInternals = function middlewareAsyncInternals() {
-  return {
-    id: uuidv4(),
-    run: [],
-    finish: function (finalFunc, finalFuncName) {
-      console.log('Finishing MW for id', this.id)
+const middlewareAsyncInternals = function middlewareAsyncInternals(fnsArray, options) {
+  console.log('Start internals', fnsArray)
 
-      return async (pReq, pRes) => {
-        const res = pRes
-        const req = {
-          ...pReq,
-          _nmc: {
-            name: finalFuncName,
-            type: '',
-          }
-        }
-        let runIndex = 0
-        let escape = false
-        
-        const next = async (arg) => {
-          if (arg) {
-            switch (arg) {
-              case 'route':
-                escape = true;
-              default:
-                break
+  class Middleware {
+    constructor() {
+      this.run = []
+      this.id = uuidv4()
+      this.finish = function (finalFunc, finalFuncName) {
+        console.log('Finishing MW for id', this.id)
+        const id = this.id
+  
+        return async (pReq, pRes) => {
+          // If the passed response object is undefined we can
+          // infer that this was called from a SSR route.
+          let type = pRes ? 'api' : 'ssr'
+
+          // in SSR the pReq will actually be the `context` object
+          // containing both the `req` and `res` objects
+          const res = pRes ?? pReq.res
+          const req = {
+            // I don't know that I really approve of this
+            ...(pRes ? pReq : pReq.res),
+            // Add a lib-specific decoration to the request
+            _nmc: {
+              id,
+              name: finalFuncName,
+              type,
             }
           }
+          let runIndex = 0
+          let escape = false
 
-          const { runFn, nextIndex } = getNextFn(this.run, runIndex)
-
-          runIndex = nextIndex
-
-          if (runFn && !escape) {
-            await runFn(req, res, next)
+          const next = async (arg) => {
+            if (arg) {
+              switch (arg) {
+                case 'route':
+                  escape = true;
+                default:
+                  break
+              }
+            }
+  
+            const { runFn, nextIndex } = getNextFn(this.run, runIndex)
+  
+            runIndex = nextIndex
+  
+            if (runFn && !escape) {
+              await runFn(req, res, next)
+            }
           }
+  
+          await next()
+  
+
+          return type === 'api' ? finalFunc(req, res) : finalFunc({req, res})
         }
-
-        await next()
-
-        return finalFunc(req, res)
       }
+
+      fnsArray.forEach((fn, i) => {
+        const fnName = fn.name
+        this.run.push(null)
+        this[fnName] = function() {
+          console.log('createMiddleware building functions', this)
+    
+          if (options.useChainOrder) {
+            this.run.push(fnsArray[i])
+          } else {
+            this.run[i] = fnsArray[i]
+          }
+    
+          return this
+        }
+      })
     }
   }
+
+  return () => new Middleware()
+
+  // return {
+  //   id: uuidv4(),
+  //   run: [],
+  //   finish: function (finalFunc, finalFuncName) {
+  //     console.log('Finishing MW for id', this.id)
+
+  //     return async (pReq, pRes) => {
+  //       const res = pRes
+  //       const req = {
+  //         ...pReq,
+  //         _nmc: {
+  //           name: finalFuncName,
+  //           type: '',
+  //         }
+  //       }
+  //       let runIndex = 0
+  //       let escape = false
+        
+  //       const next = async (arg) => {
+  //         if (arg) {
+  //           switch (arg) {
+  //             case 'route':
+  //               escape = true;
+  //             default:
+  //               break
+  //           }
+  //         }
+
+  //         const { runFn, nextIndex } = getNextFn(this.run, runIndex)
+
+  //         runIndex = nextIndex
+
+  //         if (runFn && !escape) {
+  //           await runFn(req, res, next)
+  //         }
+  //       }
+
+  //       await next()
+
+  //       return finalFunc(req, res)
+  //     }
+  //   }
+  // }
 }
 
 const middlewareInternals = () => ({
@@ -134,27 +211,42 @@ export const createMiddleware = (fnsArray, options) => {
 
   // const obj = fnsObj
   // const fns = Object.keys(fnsObj)
-  const mw = options.useAsyncMiddleware ?  middlewareAsyncInternals() : middlewareInternals()
+  // const mw = options.useAsyncMiddleware ?  middlewareAsyncInternals() : middlewareInternals()
+  // const availableFunctions = []
+  // const functionRunners = {}
 
-  fnsArray.forEach((fn, i) => {
-    const fnName = fn.name
+  // fnsArray.forEach((fn, i) => {
+  //   const fnName = fn.name
 
-    mw.id = uuidv4()
-    mw.run.push(null)
-    mw[fnName] = function() {
-      console.log('createMiddleware building functions', this)
+  //   availableFunctions.push(null)
+  //   functionRunners[fnName] = function() {
+  //     console.log('createMiddleware building functions', this)
 
-      if (options.useChainOrder) {
-        mw.run.push(fnsArray[i])
-      } else {
-        mw.run[i] = fnsArray[i]
-      }
+  //     if (options.useChainOrder) {
+  //       mw.run.push(fnsArray[i])
+  //     } else {
+  //       mw.run[i] = fnsArray[i]
+  //     }
 
-      return this
-    }
-  })
+  //     return this
+  //   }
 
-  return () => mw
+  //   // mw.id = uuidv4()
+  //   // mw.run.push(null)
+  //   // mw[fnName] = function() {
+  //   //   console.log('createMiddleware building functions', this)
+
+  //   //   if (options.useChainOrder) {
+  //   //     mw.run.push(fnsArray[i])
+  //   //   } else {
+  //   //     mw.run[i] = fnsArray[i]
+  //   //   }
+
+  //   //   return this
+  //   // }
+  // })
+
+  return middlewareAsyncInternals(fnsArray, options)
 }
 
 export const configureMiddleware = () => {
