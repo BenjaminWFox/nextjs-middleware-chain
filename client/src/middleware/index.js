@@ -1,4 +1,5 @@
-import { createMiddleware } from '../../../src/index'
+// import { createMiddleware } from '../../../src/index'
+import { createMiddleware } from '../../../build/main'
 
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
@@ -42,16 +43,16 @@ const fnEndWithEnd = (req, res, next) => {
 const decorate = (req, res, next) => {
   console.log('Running decoration...')
 
-  req._nmc.hello = 'world'
-  req._nmc.secondId = uuidv4()
+  req.nmc.hello = 'world'
+  req.nmc.secondId = uuidv4()
 
   return next()
 }
 
 const unauthorized = (req, res, next) => {
-  if (req._nmc.type === 'api') {
+  if (req.nmc.type === 'api') {
     res.status(401).json({error: 'unauthorize', message: 'access denied'})
-  } else if (req._nmc.type === 'ssr') {
+  } else if (req.nmc.type === 'ssr') {
     return next('end', {
       redirect: {
         destination: '/',
@@ -70,7 +71,7 @@ const common = async (req, res, next) => {
 
   const authRes = unauthorized(req, res, next)
 
-  console.log('Finishing common', req._nmc)
+  console.log('Finishing common', req.nmc)
 
   if (authRes) {
     return authRes
