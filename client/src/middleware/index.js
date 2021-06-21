@@ -1,5 +1,6 @@
-// import { createMiddleware } from '../../../src/index'
-import { createMiddleware } from '../../../dist/main'
+import { createMiddleware } from '../../../src/index'
+// import { createMiddleware } from '../../../dist/main'
+// import { createMiddleware } from 'nextjs-middleware-chain'
 
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
