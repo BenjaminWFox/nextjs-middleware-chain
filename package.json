@@ -2,7 +2,7 @@
   "name": "nextjs-middleware-chain",
   "version": "0.0.3",
   "description": "Flexible, chainable middleware for API and SSR routes in Next.js",
-  "main": "./build/main.js",
+  "main": "./dist/main.js",
   "scripts": {
     "test": "jest",
     "test.watch": "jest --watch",
@@ -10,8 +10,11 @@
     "build": "rollup -c"
   },
   "exports": {
-    "require": "./build/main.js",
-    "import": "./build/main.esm.js"
+    "require": "./dist/main.js",
+    "import": "./dist/main.esm.js"
+  },
+  "directories": {
+
   },
   "homepage": "https://github.com/BenjaminWFox/nextjs-middleware-chain",
   "repository": {

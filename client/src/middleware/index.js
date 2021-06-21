@@ -1,5 +1,5 @@
 // import { createMiddleware } from '../../../src/index'
-import { createMiddleware } from '../../../build/main'
+import { createMiddleware } from '../../../dist/main'
 
 function uuidv4() {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
