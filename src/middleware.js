@@ -34,18 +34,20 @@ export class Middleware {
         // in SSR the pReq will actually be the `context` object
         // containing both the `req` and `res` objects, so
         // `pRes` will be undefined.
-        const res = {
-          ...(pRes || pReq.res),
+        let res = pRes
+        let req = pReq
+
+        if (!pRes) {
+          res = pReq.res
+          req = pReq.req
         }
-        const req = {
-          ...(pRes ? pReq : pReq.req),
-          // Add a lib-specific decoration to the request
-          [DEFAULT_OPTIONS.reqPropName]: {
-            id,
-            name: finalFuncName,
-            type,
-          }
+
+        req[DEFAULT_OPTIONS.reqPropName] = {
+          id,
+          name: finalFuncName,
+          type,
         }
+
         let runIndex = 0
         const RUNNER_STATES = {
           running: 'running',
