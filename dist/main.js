@@ -123,7 +123,13 @@ function uuidv4() {
 var DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
-  reqPropName: 'nmc'
+  reqPropName: 'nmc',
+  onMiddlewareComplete: function onMiddlewareComplete(id) {
+    console.debug('onMiddlewareComplete', id);
+  },
+  onRouteComplete: function onRouteComplete(id) {
+    console.debug('onRouteComplete', id);
+  }
 };
 var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
   var _this2 = this;
@@ -143,11 +149,11 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
     });
     var id = this.id;
     return /*#__PURE__*/function () {
-      var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(pReq, pRes) {
-        var type, res, req, context, runIndex, RUNNER_STATES, runnerState, runNext, result;
-        return regeneratorRuntime.wrap(function _callee$(_context) {
+      var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(pReq, pRes) {
+        var type, res, req, context, runIndex, RUNNER_STATES, runnerState, runNext, result, finalReturnFn;
+        return regeneratorRuntime.wrap(function _callee2$(_context2) {
           while (1) {
-            switch (_context.prev = _context.next) {
+            switch (_context2.prev = _context2.next) {
               case 0:
                 // If the passed response object is undefined we can
                 // infer that this was called from a SSR route.
@@ -210,63 +216,128 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
               case 10:
                 if (!(runnerState === RUNNER_STATES.running && runIndex < _this.run.length)) {
-                  _context.next = 25;
+                  _context2.next = 28;
                   break;
                 }
 
                 result = void 0;
 
                 if (_this.options.useAsyncMiddleware) {
-                  _context.next = 16;
+                  _context2.next = 16;
                   break;
                 }
 
                 result = _this.run[runIndex](req, res, runNext);
-                _context.next = 19;
+                _context2.next = 19;
                 break;
 
               case 16:
-                _context.next = 18;
+                _context2.next = 18;
                 return _this.run[runIndex](req, res, runNext);
 
               case 18:
-                result = _context.sent;
+                result = _context2.sent;
 
               case 19:
                 if (!(!result || runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed || result.redirect)) {
-                  _context.next = 22;
+                  _context2.next = 25;
                   break;
                 }
 
-                runnerState = RUNNER_STATES.ended;
-                return _context.abrupt("return", result);
+                runnerState = RUNNER_STATES.ended; // Short-circuit-path exit of all middleware functionality
 
-              case 22:
-                runIndex += 1;
-                _context.next = 10;
-                break;
+                console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)');
+
+                _this.options.onMiddlewareComplete(_this.id);
+
+                _this.options.onRouteComplete(_this.id);
+
+                return _context2.abrupt("return", result);
 
               case 25:
+                runIndex += 1;
+                _context2.next = 10;
+                break;
+
+              case 28:
                 if (!(runnerState === RUNNER_STATES.completed)) {
-                  _context.next = 28;
+                  _context2.next = 33;
                   break;
                 }
 
                 if (res.finished) {
                   console.warn('WARHING: Response is finished! Did you really mean to `return next()` after finishing the response?');
-                }
+                } // return type === 'api' ? finalFunc(req, res) : finalFunc(context)
 
-                return _context.abrupt("return", type === 'api' ? finalFunc(req, res) : finalFunc(context));
 
-              case 28:
-                return _context.abrupt("return", undefined);
+                finalReturnFn = /*#__PURE__*/function () {
+                  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+                    var finalReturn;
+                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                      while (1) {
+                        switch (_context.prev = _context.next) {
+                          case 0:
+                            if (!(type === 'api')) {
+                              _context.next = 6;
+                              break;
+                            }
 
-              case 29:
+                            _context.next = 3;
+                            return finalFunc(req, res);
+
+                          case 3:
+                            finalReturn = _context.sent;
+                            _context.next = 9;
+                            break;
+
+                          case 6:
+                            _context.next = 8;
+                            return finalFunc(context);
+
+                          case 8:
+                            finalReturn = _context.sent;
+
+                          case 9:
+                            // Happy-path exit of all middleware functionality
+                            console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)');
+
+                            _this.options.onRouteComplete(_this.id);
+
+                            return _context.abrupt("return", finalReturn);
+
+                          case 12:
+                          case "end":
+                            return _context.stop();
+                        }
+                      }
+                    }, _callee);
+                  }));
+
+                  return function finalReturnFn() {
+                    return _ref2.apply(this, arguments);
+                  };
+                }();
+
+                _this.options.onMiddlewareComplete(_this.id);
+
+                return _context2.abrupt("return", finalReturnFn());
+
+              case 33:
+                // Unknown-path exit of all middleware functionality
+                console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)');
+
+                _this.options.onMiddlewareComplete(_this.id);
+
+                _this.options.onRouteComplete(_this.id);
+
+                return _context2.abrupt("return", undefined);
+
+              case 37:
               case "end":
-                return _context.stop();
+                return _context2.stop();
             }
           }
-        }, _callee);
+        }, _callee2);
       }));
 
       return function (_x, _x2) {

@@ -10,6 +10,12 @@ export const DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
+  onMiddlewareComplete: (id) => {
+    console.debug('onMiddlewareComplete', id)
+  },
+  onRouteComplete: (id) => {
+    console.debug('onRouteComplete', id)
+  },
 }
 
 export class Middleware {
@@ -104,6 +110,12 @@ export class Middleware {
             || result.redirect) {
             runnerState = RUNNER_STATES.ended
 
+            // Short-circuit-path exit of all middleware functionality
+            console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+            this.options.onMiddlewareComplete(this.id)
+
+            this.options.onRouteComplete(this.id)
+
             return result
           }
 
@@ -115,8 +127,35 @@ export class Middleware {
             console.warn('WARHING: Response is finished! Did you really mean to `return next()` after finishing the response?')
           }
 
-          return type === 'api' ? finalFunc(req, res) : finalFunc(context)
+          // return type === 'api' ? finalFunc(req, res) : finalFunc(context)
+
+          const finalReturnFn = async () => {
+            let finalReturn
+
+            if (type === 'api') {
+              finalReturn = await finalFunc(req, res)
+            }
+            else {
+              finalReturn = await finalFunc(context)
+            }
+
+            // Happy-path exit of all middleware functionality
+            console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+            this.options.onRouteComplete(this.id)
+
+            return finalReturn
+          }
+
+          this.options.onMiddlewareComplete(this.id)
+
+          return finalReturnFn()
         }
+
+        // Unknown-path exit of all middleware functionality
+        console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+        this.options.onMiddlewareComplete(this.id)
+
+        this.options.onRouteComplete(this.id)
 
         return undefined
       }
