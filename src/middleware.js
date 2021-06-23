@@ -36,10 +36,12 @@ export class Middleware {
         // `pRes` will be undefined.
         let res = pRes
         let req = pReq
+        let context = {}
 
         if (!pRes) {
           res = pReq.res
           req = pReq.req
+          context = pReq
         }
 
         req[DEFAULT_OPTIONS.reqPropName] = {
@@ -97,7 +99,9 @@ export class Middleware {
             result = await this.run[runIndex](req, res, runNext)
           }
 
-          if (!result || (runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed)) {
+          if (!result
+            || (runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed)
+            || result.redirect) {
             runnerState = RUNNER_STATES.ended
 
             return result
@@ -107,7 +111,11 @@ export class Middleware {
         }
 
         if (runnerState === RUNNER_STATES.completed) {
-          return type === 'api' ? finalFunc(req, res) : finalFunc({ req, res })
+          if (res.finished) {
+            console.warn('WARHING: Response is finished! Did you really mean to `return next()` after finishing the response?')
+          }
+
+          return type === 'api' ? finalFunc(req, res) : finalFunc(context)
         }
 
         return undefined

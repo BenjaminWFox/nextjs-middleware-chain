@@ -140,7 +140,7 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
     var id = this.id;
     return /*#__PURE__*/function () {
       var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(pReq, pRes) {
-        var type, res, req, runIndex, RUNNER_STATES, runnerState, runNext, result;
+        var type, res, req, context, runIndex, RUNNER_STATES, runnerState, runNext, result;
         return regeneratorRuntime.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
@@ -153,10 +153,12 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
                 res = pRes;
                 req = pReq;
+                context = {};
 
                 if (!pRes) {
                   res = pReq.res;
                   req = pReq.req;
+                  context = pReq;
                 }
 
                 req[DEFAULT_OPTIONS.reqPropName] = {
@@ -202,59 +204,60 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   return false;
                 };
 
-              case 9:
+              case 10:
                 if (!(runnerState === RUNNER_STATES.running && runIndex < _this.run.length)) {
-                  _context.next = 24;
+                  _context.next = 25;
                   break;
                 }
 
                 result = void 0;
 
                 if (_this.options.useAsyncMiddleware) {
-                  _context.next = 15;
+                  _context.next = 16;
                   break;
                 }
 
                 result = _this.run[runIndex](req, res, runNext);
-                _context.next = 18;
+                _context.next = 19;
                 break;
 
-              case 15:
-                _context.next = 17;
+              case 16:
+                _context.next = 18;
                 return _this.run[runIndex](req, res, runNext);
 
-              case 17:
+              case 18:
                 result = _context.sent;
 
-              case 18:
-                if (!(!result || runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed)) {
-                  _context.next = 21;
+              case 19:
+                if (!(!result || runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed || result.redirect)) {
+                  _context.next = 22;
                   break;
                 }
 
                 runnerState = RUNNER_STATES.ended;
                 return _context.abrupt("return", result);
 
-              case 21:
+              case 22:
                 runIndex += 1;
-                _context.next = 9;
+                _context.next = 10;
                 break;
 
-              case 24:
+              case 25:
                 if (!(runnerState === RUNNER_STATES.completed)) {
-                  _context.next = 26;
+                  _context.next = 28;
                   break;
                 }
 
-                return _context.abrupt("return", type === 'api' ? finalFunc(req, res) : finalFunc({
-                  req: req,
-                  res: res
-                }));
+                if (res.finished) {
+                  console.warn('WARHING: Response is finished! Did you really mean to `return next()` after finishing the response?');
+                }
 
-              case 26:
+                return _context.abrupt("return", type === 'api' ? finalFunc(req, res) : finalFunc(context));
+
+              case 28:
                 return _context.abrupt("return", undefined);
 
-              case 27:
+              case 29:
               case "end":
                 return _context.stop();
             }
