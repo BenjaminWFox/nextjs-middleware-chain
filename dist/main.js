@@ -2,15 +2,112 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
+function ownKeys(object, enumerableOnly) {
+  var keys = Object.keys(object);
+
+  if (Object.getOwnPropertySymbols) {
+    var symbols = Object.getOwnPropertySymbols(object);
+
+    if (enumerableOnly) {
+      symbols = symbols.filter(function (sym) {
+        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
+      });
+    }
+
+    keys.push.apply(keys, symbols);
+  }
+
+  return keys;
+}
+
+function _objectSpread2(target) {
+  for (var i = 1; i < arguments.length; i++) {
+    var source = arguments[i] != null ? arguments[i] : {};
+
+    if (i % 2) {
+      ownKeys(Object(source), true).forEach(function (key) {
+        _defineProperty(target, key, source[key]);
+      });
+    } else if (Object.getOwnPropertyDescriptors) {
+      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
+    } else {
+      ownKeys(Object(source)).forEach(function (key) {
+        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
+      });
+    }
+  }
+
+  return target;
+}
+
+function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
+  try {
+    var info = gen[key](arg);
+    var value = info.value;
+  } catch (error) {
+    reject(error);
+    return;
+  }
+
+  if (info.done) {
+    resolve(value);
+  } else {
+    Promise.resolve(value).then(_next, _throw);
+  }
+}
+
+function _asyncToGenerator(fn) {
+  return function () {
+    var self = this,
+        args = arguments;
+    return new Promise(function (resolve, reject) {
+      var gen = fn.apply(self, args);
+
+      function _next(value) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
+      }
+
+      function _throw(err) {
+        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
+      }
+
+      _next(undefined);
+    });
+  };
+}
+
+function _classCallCheck(instance, Constructor) {
+  if (!(instance instanceof Constructor)) {
+    throw new TypeError("Cannot call a class as a function");
+  }
+}
+
+function _defineProperty(obj, key, value) {
+  if (key in obj) {
+    Object.defineProperty(obj, key, {
+      value: value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+  } else {
+    obj[key] = value;
+  }
+
+  return obj;
+}
+
 /**
  * This is really only used for testing.
  *
  * @returns a guid-like string that might not be quite as random as a true guid
  */
+
 /* eslint-disable */
 function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    var r = Math.random() * 16 | 0,
+        v = c == 'x' ? r : r & 0x3 | 0x8;
     return v.toString(16);
   });
 }
@@ -22,136 +119,181 @@ function uuidv4() {
 * @property {bool} useChainOrder       Should chained functions be run in chain order (vs initial creation order). Default: TRUE
 * @property {bool} useAsyncMiddleware  Should middleware functions be able to run asynchronously? Default: FALSE
 */
-const DEFAULT_OPTIONS = {
+
+var DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
-  reqPropName: 'nmc',
+  reqPropName: 'nmc'
 };
+var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
+  var _this2 = this;
 
-class Middleware {
-  constructor(fnsArray, globalOptions, inlineOptions) {
-    this.options = {
-      ...DEFAULT_OPTIONS,
-      ...globalOptions,
-      ...inlineOptions,
-    };
-    this.run = [];
-    this.id = uuidv4();
-    this.finish = function finish(finalFunc, finalFuncName) {
-      // The run array may have null values depending on the chain & configured options.
-      this.run = this.run.filter((fn) => !!fn);
-      const { id } = this;
+  _classCallCheck(this, Middleware);
 
-      return async (pReq, pRes) => {
-        // If the passed response object is undefined we can
-        // infer that this was called from a SSR route.
-        const type = pRes ? 'api' : 'ssr';
+  this.options = _objectSpread2(_objectSpread2(_objectSpread2({}, DEFAULT_OPTIONS), globalOptions), inlineOptions);
+  this.run = [];
+  this.id = uuidv4();
 
-        // in SSR the pReq will actually be the `context` object
-        // containing both the `req` and `res` objects, so
-        // `pRes` will be undefined.
-        const res = {
-          ...(pRes || pReq.res),
-        };
-        const req = {
-          ...(pRes ? pReq : pReq.req),
-          // Add a lib-specific decoration to the request
-          [DEFAULT_OPTIONS.reqPropName]: {
-            id,
-            name: finalFuncName,
-            type,
-          }
-        };
-        let runIndex = 0;
-        const RUNNER_STATES = {
-          running: 'running',
-          ended: 'ended',
-          escaped: 'escaped',
-          handled: 'handled',
-          completed: 'completed',
-        };
-        let runnerState = RUNNER_STATES.running;
+  this.finish = function finish(finalFunc, finalFuncName) {
+    var _this = this;
 
-        /**
-         * This will handle state updates resulting from chain functions
-         * and any pre-complete return values
-         *
-         * @param {*} arg
-         * @param {*} payload
-         * @returns
-         */
-        const runNext = (arg, payload) => {
-          {
-            switch (arg) {
-            case 'route':
-            case 'end':
-              runnerState = RUNNER_STATES.ended;
+    // The run array may have null values depending on the chain & configured options.
+    this.run = this.run.filter(function (fn) {
+      return !!fn;
+    });
+    var id = this.id;
+    return /*#__PURE__*/function () {
+      var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee(pReq, pRes) {
+        var type, res, req, runIndex, RUNNER_STATES, runnerState, runNext, result;
+        return regeneratorRuntime.wrap(function _callee$(_context) {
+          while (1) {
+            switch (_context.prev = _context.next) {
+              case 0:
+                // If the passed response object is undefined we can
+                // infer that this was called from a SSR route.
+                type = pRes ? 'api' : 'ssr'; // in SSR the pReq will actually be the `context` object
+                // containing both the `req` and `res` objects, so
+                // `pRes` will be undefined.
 
-              return payload
-            default:
-              if (runIndex === this.run.length - 1) {
-                runnerState = RUNNER_STATES.completed;
-              }
+                res = pRes;
+                req = pReq;
 
-              return true
+                if (!pRes) {
+                  res = pReq.res;
+                  req = pReq.req;
+                }
+
+                req[DEFAULT_OPTIONS.reqPropName] = {
+                  id: id,
+                  name: finalFuncName,
+                  type: type
+                };
+                runIndex = 0;
+                RUNNER_STATES = {
+                  running: 'running',
+                  ended: 'ended',
+                  escaped: 'escaped',
+                  handled: 'handled',
+                  completed: 'completed'
+                };
+                runnerState = RUNNER_STATES.running;
+                /**
+                 * This will handle state updates resulting from chain functions
+                 * and any pre-complete return values
+                 *
+                 * @param {*} arg
+                 * @param {*} payload
+                 * @returns
+                 */
+
+                runNext = function runNext(arg, payload) {
+                  if (RUNNER_STATES.running) {
+                    switch (arg) {
+                      case 'route':
+                      case 'end':
+                        runnerState = RUNNER_STATES.ended;
+                        return payload;
+
+                      default:
+                        if (runIndex === _this.run.length - 1) {
+                          runnerState = RUNNER_STATES.completed;
+                        }
+
+                        return true;
+                    }
+                  }
+
+                  return false;
+                };
+
+              case 9:
+                if (!(runnerState === RUNNER_STATES.running && runIndex < _this.run.length)) {
+                  _context.next = 24;
+                  break;
+                }
+
+                result = void 0;
+
+                if (_this.options.useAsyncMiddleware) {
+                  _context.next = 15;
+                  break;
+                }
+
+                result = _this.run[runIndex](req, res, runNext);
+                _context.next = 18;
+                break;
+
+              case 15:
+                _context.next = 17;
+                return _this.run[runIndex](req, res, runNext);
+
+              case 17:
+                result = _context.sent;
+
+              case 18:
+                if (!(!result || runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed)) {
+                  _context.next = 21;
+                  break;
+                }
+
+                runnerState = RUNNER_STATES.ended;
+                return _context.abrupt("return", result);
+
+              case 21:
+                runIndex += 1;
+                _context.next = 9;
+                break;
+
+              case 24:
+                if (!(runnerState === RUNNER_STATES.completed)) {
+                  _context.next = 26;
+                  break;
+                }
+
+                return _context.abrupt("return", type === 'api' ? finalFunc(req, res) : finalFunc({
+                  req: req,
+                  res: res
+                }));
+
+              case 26:
+                return _context.abrupt("return", undefined);
+
+              case 27:
+              case "end":
+                return _context.stop();
             }
           }
+        }, _callee);
+      }));
 
-          return false
-        };
-
-        while (runnerState === RUNNER_STATES.running && runIndex < this.run.length) {
-          let result;
-
-          if (!this.options.useAsyncMiddleware) {
-            result = this.run[runIndex](req, res, runNext);
-          }
-          else {
-            // eslint-disable-next-line no-await-in-loop
-            result = await this.run[runIndex](req, res, runNext);
-          }
-
-          if (!result || (runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed)) {
-            runnerState = RUNNER_STATES.ended;
-
-            return result
-          }
-
-          runIndex += 1;
-        }
-
-        if (runnerState === RUNNER_STATES.completed) {
-          return type === 'api' ? finalFunc(req, res) : finalFunc({ req, res })
-        }
-
-        return undefined
-      }
-    };
-
-    // This will be run when there is not current instance of
-    // middleware for a given route. Depending on whether
-    // `useChainOrder` is true, functions will be added to the
-    // end of the `run` array, or inserted into the `run` array
-    // in the order they are present in the `fnsArray` array.
-    fnsArray.forEach((fn, i) => {
-      const fnName = fn.name;
-
-      this.run.push(null);
-
-      // eslint-disable-next-line func-names
-      this[fnName] = function() {
-        if (this.options.useChainOrder) {
-          this.run.push(fnsArray[i]);
-        }
-        else {
-          this.run[i] = fnsArray[i];
-        }
-
-        return this
+      return function (_x, _x2) {
+        return _ref.apply(this, arguments);
       };
-    });
-  }
-}
+    }();
+  }; // This will be run when there is not current instance of
+  // middleware for a given route. Depending on whether
+  // `useChainOrder` is true, functions will be added to the
+  // end of the `run` array, or inserted into the `run` array
+  // in the order they are present in the `fnsArray` array.
+
+
+  fnsArray.forEach(function (fn, i) {
+    var fnName = fn.name;
+
+    _this2.run.push(null); // eslint-disable-next-line func-names
+
+
+    _this2[fnName] = function () {
+      if (this.options.useChainOrder) {
+        this.run.push(fnsArray[i]);
+      } else {
+        this.run[i] = fnsArray[i];
+      }
+
+      return this;
+    };
+  });
+};
 
 /**
  * This is a factory function factory function.
@@ -161,38 +303,43 @@ class Middleware {
  *
  * @returns A factory function used to create new instances of the Middleware class
  */
-const middlewareFactoryFactory = function middlewareFactoryFactory(fnsArray, globalOptions) {
-  // Inline options will overwrite global options
-  return (inlineOptions) => new Middleware(fnsArray, globalOptions, inlineOptions)
-};
 
+var middlewareFactoryFactory = function middlewareFactoryFactory(fnsArray, globalOptions) {
+  // Inline options will overwrite global options
+  return function (inlineOptions) {
+    return new Middleware(fnsArray, globalOptions, inlineOptions);
+  };
+};
 /**
  * This is run once on creation. It return a
  * @param {object} fnsArray       A collection of functions
  * @param {MiddlewareOptions} globalOptions  An object options
  * @returns
  */
-const createMiddleware = (fnsArray, globalOptions = {}) => {
-  if (!fnsArray?.length) {
-    throw new Error('A functions array must be provided as the first argument.')
+
+
+var createMiddleware = function createMiddleware(fnsArray) {
+  var globalOptions = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : {};
+
+  if (!(fnsArray !== null && fnsArray !== void 0 && fnsArray.length)) {
+    throw new Error('A functions array must be provided as the first argument.');
   }
 
-  Object.values(fnsArray).forEach((fn) => {
+  Object.values(fnsArray).forEach(function (fn) {
     if (typeof fn !== 'function') {
-      throw new Error('Items in the functions array must be a function.')
+      throw new Error('Items in the functions array must be a function.');
     }
+
     if (!fn.name) {
-      throw new Error('Items in the functions array must be named functions.')
+      throw new Error('Items in the functions array must be named functions.');
     }
   });
-
-  Object.keys(globalOptions).forEach((key) => {
+  Object.keys(globalOptions).forEach(function (key) {
     if (!DEFAULT_OPTIONS[key]) {
-      console.warn(`Unknown option ${key} provided. Ignoring.`);
+      console.warn("Unknown option ".concat(key, " provided. Ignoring."));
     }
   });
-
-  return middlewareFactoryFactory(fnsArray, globalOptions)
+  return middlewareFactoryFactory(fnsArray, globalOptions);
 };
 
 exports.createMiddleware = createMiddleware;
