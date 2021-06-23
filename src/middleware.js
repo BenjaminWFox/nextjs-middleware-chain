@@ -10,6 +10,9 @@ export const DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
+  onMiddlewareStart: (id) => {
+    console.debug('onMiddlewareStart', id)
+  },
   onMiddlewareComplete: (id) => {
     console.debug('onMiddlewareComplete', id)
   },
@@ -94,6 +97,8 @@ export class Middleware {
           return false
         }
 
+        this.options.onMiddlewareStart(this.id)
+
         while (runnerState === RUNNER_STATES.running && runIndex < this.run.length) {
           let result
 
@@ -113,7 +118,6 @@ export class Middleware {
             // Short-circuit-path exit of all middleware functionality
             console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)')
             this.options.onMiddlewareComplete(this.id)
-
             this.options.onRouteComplete(this.id)
 
             return result

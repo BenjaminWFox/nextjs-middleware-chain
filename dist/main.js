@@ -124,6 +124,9 @@ var DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
+  onMiddlewareStart: function onMiddlewareStart(id) {
+    console.debug('onMiddlewareStart', id);
+  },
   onMiddlewareComplete: function onMiddlewareComplete(id) {
     console.debug('onMiddlewareComplete', id);
   },
@@ -214,33 +217,35 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   return false;
                 };
 
-              case 10:
+                _this.options.onMiddlewareStart(_this.id);
+
+              case 11:
                 if (!(runnerState === RUNNER_STATES.running && runIndex < _this.run.length)) {
-                  _context2.next = 28;
+                  _context2.next = 29;
                   break;
                 }
 
                 result = void 0;
 
                 if (_this.options.useAsyncMiddleware) {
-                  _context2.next = 16;
+                  _context2.next = 17;
                   break;
                 }
 
                 result = _this.run[runIndex](req, res, runNext);
-                _context2.next = 19;
+                _context2.next = 20;
                 break;
 
-              case 16:
-                _context2.next = 18;
+              case 17:
+                _context2.next = 19;
                 return _this.run[runIndex](req, res, runNext);
 
-              case 18:
+              case 19:
                 result = _context2.sent;
 
-              case 19:
+              case 20:
                 if (!(!result || runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed || result.redirect)) {
-                  _context2.next = 25;
+                  _context2.next = 26;
                   break;
                 }
 
@@ -254,14 +259,14 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
                 return _context2.abrupt("return", result);
 
-              case 25:
+              case 26:
                 runIndex += 1;
-                _context2.next = 10;
+                _context2.next = 11;
                 break;
 
-              case 28:
+              case 29:
                 if (!(runnerState === RUNNER_STATES.completed)) {
-                  _context2.next = 33;
+                  _context2.next = 34;
                   break;
                 }
 
@@ -322,7 +327,7 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
                 return _context2.abrupt("return", finalReturnFn());
 
-              case 33:
+              case 34:
                 // Unknown-path exit of all middleware functionality
                 console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)');
 
@@ -332,7 +337,7 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
                 return _context2.abrupt("return", undefined);
 
-              case 37:
+              case 38:
               case "end":
                 return _context2.stop();
             }
