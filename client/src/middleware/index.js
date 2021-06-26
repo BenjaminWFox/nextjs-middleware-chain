@@ -93,6 +93,10 @@ const middleware = [
 const options = {
   useChainOrder: true,
   useAsyncMiddleware: true,
+  reqPropName: 'nmc',
+  onMiddlewareStart: () => {},
+  onMiddlewareComplete: () => {},
+  onRouteComplete: () => {},
 }
 
 export default createMiddleware(middleware, options)
