@@ -159,7 +159,7 @@ describe('The MW Class `finish` method', () => {
     await rollup(req, res)
 
     expect(finalFunc).toBeCalledTimes(1)
-    expect(finalFunc).toHaveBeenLastCalledWith({ ...req, nmc }, { ...res })
+    expect(finalFunc).toHaveBeenLastCalledWith(req, res)
   })
 
   it('should run as SSR type', async () => {
@@ -181,7 +181,7 @@ describe('The MW Class `finish` method', () => {
     await rollup({ req, res })
 
     expect(finalFunc).toBeCalledTimes(1)
-    expect(finalFunc).toHaveBeenLastCalledWith({ req: { ...req, nmc }, res: { ...res } })
+    expect(finalFunc).toHaveBeenLastCalledWith({ req, res })
   })
 
   it('should run with the `req`, `res`, and `next` arguments', () => {
