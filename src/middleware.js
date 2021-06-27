@@ -34,6 +34,7 @@ export class Middleware {
       // The run array may have null values depending on the chain & configured options.
       this.run = this.run.filter((fn) => !!fn)
       const { id } = this
+      const friendlyName = finalFuncName || finalFunc.name
 
       return async (pReq, pRes) => {
         // If the passed response object is undefined we can
@@ -53,10 +54,11 @@ export class Middleware {
           context = pReq
         }
 
-        req[DEFAULT_OPTIONS.reqPropName] = {
+        req[this.options.reqPropName] = {
           id,
-          name: finalFuncName,
+          name: friendlyName,
           type,
+          context,
         }
 
         let runIndex = 0
@@ -80,11 +82,14 @@ export class Middleware {
         const runNext = (arg, payload) => {
           if (RUNNER_STATES.running) {
             switch (arg) {
-            case 'route':
             case 'end':
               runnerState = RUNNER_STATES.ended
 
               return payload
+            case 'route':
+              runnerState = RUNNER_STATES.completed
+
+              return true
             default:
               if (runIndex === this.run.length - 1) {
                 runnerState = RUNNER_STATES.completed
