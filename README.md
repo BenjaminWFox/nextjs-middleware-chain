@@ -6,7 +6,11 @@ NMC aims to provide a simple framework for writing methods that can be run befor
 
 This library is still in an early stage of development. It has been tested it in a couple projects and should be stable, however there may be bugs or scenarios that have not been realized or planned for.
 
-If you encounter a problem, please [open an issue](https://github.com/BenjaminWFox/nextjs-middleware-chain/issues) and abide by the [code of conduct](https://github.com/BenjaminWFox/nextjs-middleware-chain/blob/main/CODE-OF-CONDUCT.md).
+If you encounter a bug or problem, please [open an issue](https://github.com/BenjaminWFox/nextjs-middleware-chain/issues).
+
+If you have feedback or questions, please [start a discussion](https://github.com/BenjaminWFox/nextjs-middleware-chain/discussions).
+
+Please be civil and abide by the [code of conduct](https://github.com/BenjaminWFox/nextjs-middleware-chain/blob/main/CODE-OF-CONDUCT.md).
 
 ## Why
 
@@ -208,8 +212,8 @@ export default preBuiltChain.otherMiddleware().finish(routeFunction)
 
 Note that when you import & use the `preBuiltChain` it is *already* an instance of `Middleware` and so should be accessed as an object, not run as a method.
 
-## Upcoming TODO work
+## Planned Work
 
-- Finish event callback implementations
-- Update unit tests
+- Add automatic versioning & releases
+- Add additional unit tests
 - Move to TypeScript
