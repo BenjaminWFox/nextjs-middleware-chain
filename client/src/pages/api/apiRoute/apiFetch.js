@@ -1,4 +1,4 @@
-import middleware from '../../../middleware'
+import middleware, { preBuiltChain } from '../../../middleware'
 
 const apiFetch = (req, res) => {
   console.info('Running apiFetch', req.nmc)
@@ -6,11 +6,14 @@ const apiFetch = (req, res) => {
   res.status(200).json({ data: 'API Fetch Return' })
 }
 
-export default middleware()
-// .fnB()
-// .unauthorized()
-// .fnD()
-// .fnA()
-  .decorate()
-  .common()
-  .finish(apiFetch, 'API Fetch')
+// export default middleware()
+//   // .fnB()
+//   // .unauthorized()
+//   .fnD()
+//   // .skipRemainingMiddleware()
+//   .fnA()
+//   .common()
+//   .decorate()
+//   .finish(apiFetch, 'API Fetch')
+
+export default preBuiltChain.fnD().finish(apiFetch, 'API Fetch PreBuilt')

@@ -11,17 +11,6 @@ async function getProps({ req, res }) {
 
   const responses = await Promise.all([
     ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
-    // ssrImport(req, res),
   ])
 
   console.info('Responses', responses)
@@ -36,10 +25,11 @@ async function getProps({ req, res }) {
 // export const getServerSideProps = getProps
 
 export const getServerSideProps = middleware()
-// .fnB()
-// .unauthorized()
-// .fnD()
-// .fnA()
+  .fnB()
+  // .unauthorized()
+  .skipRemainingMiddleware()
+  .fnD()
+  .fnA()
   .decorate()
-  .common()
+  // .common()
   .finish(getProps, 'SSR Import')
