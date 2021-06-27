@@ -164,7 +164,7 @@ Property | Type | Value
 `type` | `string` | `api` or `ssr` - the type of route the middleware is being run from<sup>*</sup>
 `context` | `object` | The Next.js `context` object [provided to SSR routes](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering). Will be `{}` for API routes.
 
-<sup>*</sup> This determination is made based on the arguments the middleware receives from Next.js, which will either be `(req, res)` for API routes, or `(context, undefined)` for SSR routes.
+<sup>*</sup> This determination is made based on the arguments the middleware runner receives from Next.js, which will either be `(req, res) => {...}` for API routes, or `(context, undefined) => {...}` for SSR routes.
 
 ## Middleware Patterns
 
