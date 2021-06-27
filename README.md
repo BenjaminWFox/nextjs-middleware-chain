@@ -1,8 +1,8 @@
 # Next.js Middleware Chain
 
-Next.js Middleware Chain (NMC) is a lightweight, zero-dependency middleware solution for Next.js built on the idea that middleware functions are more flexible when they can be chained as needed during development.
+Next.js Middleware Chain (NMC) is a lightweight, zero-dependency next.js middleware solution. It is built on the idea that middleware functions are more flexible when they can be chained as needed during development.
 
-NMC aims to provide a simple framework for writing methods that can be run before *either* API or SSR (`getServerSideProps`) routes.
+NMC aims to provide a simple framework for writing methods that can be used with *either* Next.js API routes or SSR (`getServerSideProps`) data fetching.
 
 This library is still in an early stage of development. It has been tested it in a couple projects and should be stable, however there may be bugs or scenarios that have not been realized or planned for.
 
