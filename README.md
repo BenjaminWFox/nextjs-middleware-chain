@@ -57,8 +57,8 @@ import mwFactory from './middleware'
 /* ... api or ssr routeFunction(...) {...} ... */
 
 export default mwFactory().mwFunction().finish(
-  routeFunction,
-  'Friendly Route Name'
+  routeFunction,        // required
+  'Friendly Route Name' // optional
 )
 ```
 

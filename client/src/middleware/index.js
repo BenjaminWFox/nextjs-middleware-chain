@@ -62,30 +62,31 @@ const unauthorized = (req, res, next) => {
     })
   }
 
-  // This will not trigger in this function
-  // but would be the 'authorized' case in
-  // this hypothetical example.
-  return next()
+  /**
+   * This is not required for this hypothetical
+   * example but would be the 'authorized' case
+   */
+  // return next()
 }
 
 const common = async (req, res, next) => {
-  const aRes = fnA(req, res, next)
-  console.log('aRes', aRes)
+  const aReturn = fnA(req, res, next)
+  console.log('aRes', aReturn)
 
-  const bRes = await fnB(req, res, next)
-  console.log('bRes', bRes)
+  const bReturn = await fnB(req, res, next)
+  console.log('bRes', aReturn)
 
-  const authRes = unauthorized(req, res, next)
+  const authReturn = unauthorized(req, res, next)
 
   console.log('Finishing common', req.nmc)
 
-  if (authRes) {
-    return authRes
+  if (authReturn) {
+    return authReturn
   }
 }
 
 const skipRemainingMiddleware = (req, res, next) => {
-  console.log('noReturn')
+  console.log('Skipping Remaining Middlewares...')
 
   return next('route')
 }
