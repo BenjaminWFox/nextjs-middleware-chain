@@ -78,7 +78,7 @@ const common = async (req, res, next) => {
 
   const authReturn = unauthorized(req, res, next)
 
-  console.log('Finishing common', req.nmc)
+  console.log('Finishing common for', req.nmc.name)
 
   if (authReturn) {
     return authReturn
@@ -107,9 +107,15 @@ const optionsObject = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
-  onMiddlewareStart: () => {},
-  onMiddlewareComplete: () => {},
-  onRouteComplete: () => {},
+  onMiddlewareStart: (req) => {
+    console.debug('Callback onMiddlewareStart for', req.nmc.name)
+  },
+  onMiddlewareComplete: (req) => {
+    console.debug('Callback onMiddlewareComplete for', req.nmc.name)
+  },
+  onRouteComplete: (req) => {
+    console.debug('Callback onRouteComplete for', req.nmc.name)
+  },
 }
 
 const mwFactory = createMiddleware(middlewareFunctionsArray, optionsObject)

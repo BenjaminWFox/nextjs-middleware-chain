@@ -6,16 +6,16 @@ const apiFetch = (req, res) => {
   res.status(200).json({ data: 'API Fetch Return' })
 }
 
-export default middleware()
-  // .fnB()
-  // .unauthorized()
-  .fnD()
-  // .skipRemainingMiddleware()
-  .fnA()
-  .common()
-  .decorate()
-  .finish(apiFetch, 'API Fetch')
-
-// export default preBuiltChain
+// export default middleware()
+//   // .fnB()
+//   // .unauthorized()
 //   .fnD()
-//   .finish(apiFetch, 'API Fetch PreBuilt')
+//   .skipRemainingMiddleware()
+//   .fnA()
+//   .common()
+//   .decorate()
+//   .finish(apiFetch, 'API Fetch')
+
+export default preBuiltChain
+  .fnD()
+  .finish(apiFetch, 'API Fetch PreBuilt')
