@@ -66,7 +66,7 @@ export default mwFactory().mwFunction().finish(
 )
 ```
 
-This repo also includes a Next.js sample "client" project which you can reference & run to test out the middleware. You can reference the setup & syntax for NMC in these files:
+This repo also includes a Next.js sample "client" project which you can reference & run to test out the library. You can reference the setup & syntax for NMC in these files:
 - [middleware setup](https://github.com/BenjaminWFox/nextjs-middleware-chain/blob/main/client/src/middleware/index.js)
 - [api route implementation](https://github.com/BenjaminWFox/nextjs-middleware-chain/blob/main/client/src/pages/api/apiRoute/apiFetch.js)
 - [ssr route implementation](https://github.com/BenjaminWFox/nextjs-middleware-chain/blob/main/client/src/pages/ssr-route.js)
@@ -75,18 +75,16 @@ This repo also includes a Next.js sample "client" project which you can referenc
 
 Any middleware functions you create will be made available to NMC by adding them to this array, and passing this array as the first argument to `createMiddleware`.
 
-**Important Note:** The order of the functions in the array matters if you change the `useChainOrder` option to `false`, in which case the middleware functions will ***always*** be run in the order in which they appear in the array. 
-
 ### Options object
 
 The default options will apply globally unless they are overwritten. You can overwrite options:
 - **globally**: by passing an object as the second argument to the `createMiddleware` function.
 - **per-route**: by passing an object as the only argument to the middleware factory responsible for creating an instance of the middleware.
-  -  `mwFactory(optionsObject).mwFunction()...`
+  -  `mwFactory(optionsObject).mwFunction().finish(...)`
 
 Property | Type | Default | Purpose
 --- | --- | --- | ---
-useChainOrder | bool | true | Run middleware functions in the order they are used in the chain. When `false` this will ***always*** run the middleware function in the same order - the order they were added to the array passed to `createMiddleware`.
+useChainOrder | bool | true | Run middleware functions in the order they are used in the chain. When `false` this will ***always*** run the middleware function in the same order - the order they were added to the functions array passed to `createMiddleware`.
 useAsyncMiddleware | bool | true | Run middleware functions asynchronously. When `false` middleware functions will run synchronously.
 reqPropName | string | `nmc` | The name of the decoration property added to the `req` object for all routes. You can rename this if it causes a collision or of you don't like these letters.
 onMiddlewareStart | function | (req) => {} | Run before starting the middleware chain. Receives the decorated `req` object as an argument.
@@ -100,7 +98,7 @@ All middleware functions will receive 3 arguments:
 - `res`
 - `next`
 
-`req` and `res` are provided by the Next.js route, so be aware than if you are using a chain function in *both* API and SSR contexts you may not have access to certain Next.js-provided decorations, which are only added for API routes:
+`req` and `res` are provided by the Next.js route. They will be passed by reference to all middleware functions, so can be mutated throughout the chain. Be aware than if you are using a chain function in *both* API and SSR contexts you may not have access to certain Next.js-provided decorations, which are only added for API routes:
   - [Request Helpers](https://nextjs.org/docs/api-routes/api-middlewares)
   - [Response Helpers](https://nextjs.org/docs/api-routes/response-helpers)
 
@@ -128,8 +126,8 @@ To skip any remaining middleware function ***and ignore the Next.js route***:
 
 - From API routes: End the response via the `res` object, and return nothing.
   - `res.status(###).json({ message: '...' })`
-- From SSR routes: Return `next('end', { ...payload })`
-  - `return next('end', { ...payload })`
+- From SSR routes: Return with the keyword `'end'` and a payload object.
+  -  `return next('end', { ...payload })`
     - **The payload object is required** - it will be the `return` from `getServerSideProps` so should be [a standard Next.js getServerSideProps response](https://nextjs.org/docs/basic-features/data-fetching#getserversideprops-server-side-rendering).
 
 ```javascript
