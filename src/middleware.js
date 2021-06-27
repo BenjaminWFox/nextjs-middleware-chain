@@ -10,15 +10,9 @@ export const DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
-  onMiddlewareStart: (id) => {
-    console.debug('onMiddlewareStart', id)
-  },
-  onMiddlewareComplete: (id) => {
-    console.debug('onMiddlewareComplete', id)
-  },
-  onRouteComplete: (id) => {
-    console.debug('onRouteComplete', id)
-  },
+  onMiddlewareStart: () => {},
+  onMiddlewareComplete: () => {},
+  onRouteComplete: () => {},
 }
 
 export class Middleware {
@@ -102,7 +96,7 @@ export class Middleware {
           return false
         }
 
-        this.options.onMiddlewareStart(this.id)
+        this.options.onMiddlewareStart(req)
 
         while (runnerState === RUNNER_STATES.running && runIndex < this.run.length) {
           let result
@@ -121,9 +115,9 @@ export class Middleware {
             runnerState = RUNNER_STATES.ended
 
             // Short-circuit-path exit of all middleware functionality
-            console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)')
-            this.options.onMiddlewareComplete(this.id)
-            this.options.onRouteComplete(this.id)
+            // console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+            this.options.onMiddlewareComplete(req)
+            this.options.onRouteComplete(req)
 
             return result
           }
@@ -149,22 +143,22 @@ export class Middleware {
             }
 
             // Happy-path exit of all middleware functionality
-            console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)')
-            this.options.onRouteComplete(this.id)
+            // console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+            this.options.onRouteComplete(req)
 
             return finalReturn
           }
 
-          this.options.onMiddlewareComplete(this.id)
+          this.options.onMiddlewareComplete(req)
 
           return finalReturnFn()
         }
 
         // Unknown-path exit of all middleware functionality
-        console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)')
-        this.options.onMiddlewareComplete(this.id)
+        // console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+        this.options.onMiddlewareComplete(req)
 
-        this.options.onRouteComplete(this.id)
+        this.options.onRouteComplete(req)
 
         return undefined
       }
