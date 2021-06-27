@@ -61,6 +61,11 @@ const unauthorized = (req, res, next) => {
       }
     })
   }
+
+  // This will not trigger in this function
+  // but would be the 'authorized' case in
+  // this hypothetical example.
+  return next()
 }
 
 const common = async (req, res, next) => {
@@ -79,7 +84,13 @@ const common = async (req, res, next) => {
   }
 }
 
-const middleware = [
+const skipRemainingMiddleware = (req, res, next) => {
+  console.log('noReturn')
+
+  return next('route')
+}
+
+const middlewareFunctionsArray = [
   fnA,
   fnB,
   fnC,
@@ -87,10 +98,11 @@ const middleware = [
   fnEndWithEnd,
   unauthorized,
   decorate,
-  common
+  common,
+  skipRemainingMiddleware,
 ]
 
-const options = {
+const optionsObject = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
@@ -99,4 +111,9 @@ const options = {
   onRouteComplete: () => {},
 }
 
-export default createMiddleware(middleware, options)
+const mwFactory = createMiddleware(middlewareFunctionsArray, optionsObject)
+
+const preBuiltChain = mwFactory().fnA().fnB().fnC()
+
+export { preBuiltChain }
+export default mwFactory
