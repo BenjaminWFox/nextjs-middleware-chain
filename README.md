@@ -85,9 +85,9 @@ Property | Type | Default | Purpose
 useChainOrder | bool | true | Run middleware functions in the order they are used in the chain. When `false` this will ***always*** run the middleware function in the same order - the order they were added to the array passed to `createMiddleware`.
 useAsyncMiddleware | bool | true | Run middleware functions asynchronously. When `false` middleware functions will run synchronously.
 reqPropName | string | `nmc` | The name of the decoration property added to the `req` object for all routes. You can rename this if it causes a collision or of you don't like these letters.
-onMiddlewareStart | function | () => {} | INCOMPLETE IMPLEMENTATION
-onMiddlewareComplete | function | () => {} | INCOMPLETE IMPLEMENTATION
-onRouteComplete | function | () => {} | INCOMPLETE IMPLEMENTATION
+onMiddlewareStart | function | (req) => {} | Run before starting the middleware chain. Receives the decorated `req` object as an argument.
+onMiddlewareComplete | function | (req) => {} | Run after all middleware is complete (or when `next()` is called with `'end'` or `'route'`) and before the Next.js route is run. Receives the decorated `req` object as an argument.
+onRouteComplete | function | (req) => {} | Runs after the Next.js route has been run (or skipped). Receives the decorated `req` object as an argument.
 
 ### Writing middleware functions
 
