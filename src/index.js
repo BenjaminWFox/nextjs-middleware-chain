@@ -14,9 +14,12 @@ const middlewareFactoryFactory = function middlewareFactoryFactory(fnsArray, glo
 }
 
 /**
- * This is run once on creation. It return a
- * @param {object} fnsArray       A collection of functions
- * @param {MiddlewareOptions} globalOptions  An object options
+ * This is run once on creation. It return a factory function that
+ * is, itself, a factory function for creating `Middleware` instances.
+ *
+ * @param {array}            functionsArray        A collection of functions
+ * @param {MiddlewareOptions} globalOptionsObject   An object options
+ *
  * @returns
  */
 export const createMiddleware = (fnsArray, globalOptions = {}) => {
