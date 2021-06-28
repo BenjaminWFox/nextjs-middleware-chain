@@ -1,7 +1,7 @@
 {
   "name": "nextjs-middleware-chain",
   "version": "0.0.7",
-  "description": "Flexible, chainable middleware for API and SSR routes in Next.js",
+  "description": "Next.js middleware library for API and SSR routes.",
   "main": "./dist/main.js",
   "scripts": {
     "test": "jest",
