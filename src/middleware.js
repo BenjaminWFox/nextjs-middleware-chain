@@ -166,7 +166,7 @@ export class Middleware {
       return runnableMiddleware
     }
 
-    // This will be run when there is not current instance of
+    // This will be run when there is no existing instance of
     // middleware for a given route. Depending on whether
     // `useChainOrder` is true, functions will be added to the
     // end of the `run` array, or inserted into the `run` array
