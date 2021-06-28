@@ -30,7 +30,7 @@ export class Middleware {
       const { id } = this
       const friendlyName = finalFuncName || finalFunc.name
 
-      return async (pReq, pRes) => {
+      const runnableMiddleware = async (pReq, pRes) => {
         // If the passed response object is undefined we can
         // infer that this was called from a SSR route.
         const type = pRes ? 'api' : 'ssr'
@@ -162,6 +162,8 @@ export class Middleware {
 
         return undefined
       }
+
+      return runnableMiddleware
     }
 
     // This will be run when there is not current instance of

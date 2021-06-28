@@ -15,18 +15,18 @@ let error
 
 beforeEach(() => {
   const fnA = (req, res, next) => next('Ran A')
-  const fnB = function fnB() {}
-  const fnC = function fnC() {}
-  const fnD = () => {}
+  const fnB = function fnB() { }
+  const fnC = function fnC() { }
+  const fnD = () => { }
 
   badMWFnsArrow = [
     fnA,
-    () => {}
+    () => { }
   ]
 
   badMWFnsFunc = [
     fnB,
-    function() {} // eslint-disable-line func-names
+    function() { } // eslint-disable-line func-names
   ]
 
   goodMWFns = [
@@ -108,14 +108,14 @@ describe('The basics of `createmiddleware` function', () => {
   })
 })
 
-describe('The return of `createMiddleware` factory factory function', () => {
+describe('The factory function factory function returned by `createMiddleware`', () => {
   it('Should return a function that creates a new instance of Middleware', () => {
     expect(typeof middlewareFactory).toBe('function')
     expect(middlewareInstance).toBeInstanceOf(Middleware)
   })
 })
 
-describe('The Middleware class and its instances', () => {
+describe('Instances of `Middleware`', () => {
   it('Should have a property for each function in the functions array that is a function', () => {
     goodMWFns.forEach((fn) => {
       expect(middlewareInstance[fn.name]).toBeDefined()
@@ -139,49 +139,51 @@ describe('The Middleware class and its instances', () => {
   })
 })
 
-describe('The MW Class `finish` method', () => {
-  it('should run as API type', async () => {
-    const nmc = {
-      id: undefined,
-      name: 'Final Func',
-      type: 'api',
-    }
-    const finalFunc = jest.fn()
-    const req = jest.fn().mockReturnValue()
-    const res = jest.fn().mockReturnValue()
-    const mwInstance = middlewareFactory({ useAsyncMiddleware: false }).fnA()
-    const rollup = mwInstance.finish(finalFunc, nmc.name)
+describe('The `Middleware.finish` factory method', () => {
+  describe('The `runnableMiddleware` returned by the `Middleware.finish` factory', () => {
+    it('should run as API type when runnableMiddleware receives two arguments', async () => {
+      const nmc = {
+        id: undefined,
+        name: 'Final Func',
+        type: 'api',
+      }
+      const finalFunc = jest.fn()
+      const req = jest.fn().mockReturnValue()
+      const res = jest.fn().mockReturnValue()
+      const mwInstance = middlewareFactory({ useAsyncMiddleware: false }).fnA()
+      const runnableMiddleware = mwInstance.finish(finalFunc, nmc.name)
 
-    // Expect that it will trim all null values from run array
-    expect(mwInstance.run.length).toBe(1)
-    expect(mwInstance.run[0].name).toBe('fnA')
+      // Expect that it will trim all null values from run array
+      expect(mwInstance.run.length).toBe(1)
+      expect(mwInstance.run[0].name).toBe('fnA')
 
-    await rollup(req, res)
+      await runnableMiddleware(req, res)
 
-    expect(finalFunc).toBeCalledTimes(1)
-    expect(finalFunc).toHaveBeenLastCalledWith(req, res)
-  })
+      expect(finalFunc).toBeCalledTimes(1)
+      expect(finalFunc).toHaveBeenLastCalledWith(req, res)
+    })
 
-  it('should run as SSR type', async () => {
-    const nmc = {
-      id: undefined,
-      name: 'Final Func',
-      type: 'ssr',
-    }
-    const finalFunc = jest.fn()
-    const req = jest.fn().mockReturnValue({ req: 'req' })
-    const res = jest.fn().mockReturnValue({ res: 'res' })
-    const mwInstance = middlewareFactory({ useAsyncMiddleware: false }).fnA()
-    const rollup = mwInstance.finish(finalFunc, nmc.name)
+    it('should run as SSR type when runnableMiddleware receives a single argument', async () => {
+      const nmc = {
+        id: undefined,
+        name: 'Final Func',
+        type: 'ssr',
+      }
+      const finalFunc = jest.fn()
+      const req = jest.fn().mockReturnValue({ req: 'req' })
+      const res = jest.fn().mockReturnValue({ res: 'res' })
+      const mwInstance = middlewareFactory({ useAsyncMiddleware: false }).fnA()
+      const runnableMiddleware = mwInstance.finish(finalFunc, nmc.name)
 
-    // Expect that it will trim all null values from run array
-    expect(mwInstance.run.length).toBe(1)
-    expect(mwInstance.run[0].name).toBe('fnA')
+      // Expect that it will trim all null values from run array
+      expect(mwInstance.run.length).toBe(1)
+      expect(mwInstance.run[0].name).toBe('fnA')
 
-    await rollup({ req, res })
+      await runnableMiddleware({ req, res })
 
-    expect(finalFunc).toBeCalledTimes(1)
-    expect(finalFunc).toHaveBeenLastCalledWith({ req, res })
+      expect(finalFunc).toBeCalledTimes(1)
+      expect(finalFunc).toHaveBeenLastCalledWith({ req, res })
+    })
   })
 
   it('should run with the `req`, `res`, and `next` arguments', () => {
@@ -189,34 +191,36 @@ describe('The MW Class `finish` method', () => {
   })
 })
 
-describe('The functions added to the middleware instance for chained running', () => {
+describe('The `Middleware` class constructor', () => {
   let mwFactory
 
   beforeEach(() => {
     mwFactory = createMiddleware(goodMWFns)
   })
 
-  it(`Should add a function to the end of the 'run' array
-  in chained order when 'useChainOrder' is true`, () => {
-    const mwInstance = mwFactory().fnC().fnA()
+  describe('The `fnsArray.forEach` loop behavior', () => {
+    it(`Should add a function to the end of the 'run' array
+        in chained order when 'useChainOrder' is true`, () => {
+      const mwInstance = mwFactory().fnC().fnA()
 
-    expect(mwInstance.run[0]).toBeNull()
-    expect(mwInstance.run[1]).toBeNull()
-    expect(mwInstance.run[2]).toBeNull()
-    expect(mwInstance.run[3]).toBeNull()
-    expect(mwInstance.run[4].name).toBe('fnC')
-    expect(mwInstance.run[5].name).toBe('fnA')
-    expect(mwInstance.run[6]).toBeUndefined()
-  })
+      expect(mwInstance.run[0]).toBeNull()
+      expect(mwInstance.run[1]).toBeNull()
+      expect(mwInstance.run[2]).toBeNull()
+      expect(mwInstance.run[3]).toBeNull()
+      expect(mwInstance.run[4].name).toBe('fnC')
+      expect(mwInstance.run[5].name).toBe('fnA')
+      expect(mwInstance.run[6]).toBeUndefined()
+    })
 
-  it(`Should add a function to the 'run' array at the same order as
-  the initial functions array when 'useChainOrder' is false`, () => {
-    const mwInstance = mwFactory({ useChainOrder: false }).fnC().fnA()
+    it(`Should add a function to the 'run' array at the same order as
+        the initial functions array when 'useChainOrder' is false`, () => {
+      const mwInstance = mwFactory({ useChainOrder: false }).fnC().fnA()
 
-    expect(mwInstance.run[0].name).toBe('fnA')
-    expect(mwInstance.run[1]).toBeNull()
-    expect(mwInstance.run[2].name).toBe('fnC')
-    expect(mwInstance.run[3]).toBeNull()
-    expect(mwInstance.run[5]).toBeUndefined()
+      expect(mwInstance.run[0].name).toBe('fnA')
+      expect(mwInstance.run[1]).toBeNull()
+      expect(mwInstance.run[2].name).toBe('fnC')
+      expect(mwInstance.run[3]).toBeNull()
+      expect(mwInstance.run[5]).toBeUndefined()
+    })
   })
 })
