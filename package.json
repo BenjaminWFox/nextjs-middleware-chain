@@ -23,8 +23,9 @@
   "keywords": [
     "next",
     "nextjs",
-    "react",
-    "middleware"
+    "middleware",
+    "chainable-methods",
+    "chainable"
   ],
   "author": "Ben Fox",
   "license": "ISC",
