@@ -13,11 +13,51 @@ let badMWFnsArrow
 let badMWFnsFunc
 let error
 
+let fnASpy
+let fnBSpy
+let fnCSpy
+let fnDSpy
+let fnSkipAllSpy
+let fnSkipMwSpy
+
 beforeEach(() => {
-  const fnA = (req, res, next) => next('Ran A')
-  const fnB = function fnB() { }
-  const fnC = function fnC() { }
-  const fnD = () => { }
+  fnASpy = jest.fn()
+  fnBSpy = jest.fn()
+  fnCSpy = jest.fn()
+  fnDSpy = jest.fn()
+  fnSkipAllSpy = jest.fn()
+  fnSkipMwSpy = jest.fn()
+
+  const fnA = (req, res, next) => {
+    fnASpy()
+
+    return next('Ran A')
+  }
+  const fnB = function fnB(req, res, next) {
+    fnBSpy()
+
+    return next('Ran B')
+  }
+  const fnC = function fnC(req, res, next) {
+    fnCSpy()
+
+    return next('Ran C')
+  }
+  const fnD = (req, res, next) => {
+    fnDSpy()
+
+    return next('Ran D')
+  }
+  const fnSkipRemainingAll = (req, res, next) => {
+    fnSkipAllSpy()
+
+    return next('EnD')
+  }
+  const fnSkipRemainingMiddleware = (req, res, next) => {
+    fnSkipMwSpy()
+
+    return next('rOutE')
+  }
 
   badMWFnsArrow = [
     fnA,
@@ -34,6 +74,8 @@ beforeEach(() => {
     fnB,
     fnC,
     fnD,
+    fnSkipRemainingAll,
+    fnSkipRemainingMiddleware
   ]
 })
 
@@ -202,25 +244,86 @@ describe('The `Middleware` class constructor', () => {
     it(`Should add a function to the end of the 'run' array
         in chained order when 'useChainOrder' is true`, () => {
       const mwInstance = mwFactory().fnC().fnA()
+      const firstNamedIndex = goodMWFns.length
 
       expect(mwInstance.run[0]).toBeNull()
       expect(mwInstance.run[1]).toBeNull()
       expect(mwInstance.run[2]).toBeNull()
       expect(mwInstance.run[3]).toBeNull()
-      expect(mwInstance.run[4].name).toBe('fnC')
-      expect(mwInstance.run[5].name).toBe('fnA')
-      expect(mwInstance.run[6]).toBeUndefined()
+      expect(mwInstance.run[firstNamedIndex].name).toBe('fnC')
+      expect(mwInstance.run[firstNamedIndex + 1].name).toBe('fnA')
     })
 
     it(`Should add a function to the 'run' array at the same order as
         the initial functions array when 'useChainOrder' is false`, () => {
       const mwInstance = mwFactory({ useChainOrder: false }).fnC().fnA()
+      const firstUndefinedIndex = goodMWFns.length
 
       expect(mwInstance.run[0].name).toBe('fnA')
       expect(mwInstance.run[1]).toBeNull()
       expect(mwInstance.run[2].name).toBe('fnC')
       expect(mwInstance.run[3]).toBeNull()
-      expect(mwInstance.run[5]).toBeUndefined()
+      expect(mwInstance.run[firstUndefinedIndex]).toBeUndefined()
     })
+  })
+})
+
+describe('The `Middleware` runner short-circuit methods', () => {
+  let mwFactory
+
+  beforeEach(() => {
+    jest.resetAllMocks()
+
+    mwFactory = createMiddleware(goodMWFns)
+  })
+
+  it('Should skip all remaining middleware AND Next.js route when a mw function returns `next("end")`', async () => {
+    const routeFn = jest.fn()
+    const mwChain = mwFactory()
+      .fnA()
+      .fnB()
+      .fnSkipRemainingAll()
+      .fnC()
+      .fnD()
+
+    const runnableMiddleware = mwChain.finish(routeFn, 'Route Function')
+
+    await runnableMiddleware({}, {})
+
+    expect(fnASpy).toHaveBeenCalledTimes(1)
+    expect(fnBSpy).toHaveBeenCalledTimes(1)
+    expect(fnCSpy).toHaveBeenCalledTimes(0)
+    expect(fnDSpy).toHaveBeenCalledTimes(0)
+    expect(routeFn).toHaveBeenCalledTimes(0)
+  })
+
+  it('Should skip any remaining middleware when a mw function returns `next("route")`', async () => {
+    const routeFn = jest.fn()
+    const mwChain = mwFactory()
+      .fnA()
+      .fnB()
+      .fnSkipRemainingMiddleware()
+      .fnC()
+      .fnD()
+
+    const runnableMiddleware = mwChain.finish(routeFn, 'Route Function')
+
+    await runnableMiddleware({}, {})
+
+    expect(fnASpy).toHaveBeenCalledTimes(1)
+    expect(fnBSpy).toHaveBeenCalledTimes(1)
+    expect(fnCSpy).toHaveBeenCalledTimes(0)
+    expect(fnDSpy).toHaveBeenCalledTimes(0)
+    expect(routeFn).toHaveBeenCalledTimes(1)
+  })
+})
+
+describe('Multi-method patterns', () => {
+  describe('Multiple middlewares run in a single middleware', () => {
+
+  })
+
+  describe('Multiple middlewares in a pre-built chain', () => {
+
   })
 })
