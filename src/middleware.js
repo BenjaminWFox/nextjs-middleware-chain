@@ -10,9 +10,9 @@ export const DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
-  onMiddlewareStart: () => {},
-  onMiddlewareComplete: () => {},
-  onRouteComplete: () => {},
+  onMiddlewareStart: () => { },
+  onMiddlewareComplete: () => { },
+  onRouteComplete: () => { },
 }
 
 export class Middleware {
@@ -74,8 +74,10 @@ export class Middleware {
          * @returns
          */
         const runNext = (arg, payload) => {
+          const returnedArg = arg?.toLowerCase() || ''
+
           if (RUNNER_STATES.running) {
-            switch (arg.toLowerCase()) {
+            switch (returnedArg) {
             case 'end':
               runnerState = RUNNER_STATES.ended
 
