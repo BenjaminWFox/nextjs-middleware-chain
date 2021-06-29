@@ -75,7 +75,7 @@ export class Middleware {
          */
         const runNext = (arg, payload) => {
           if (RUNNER_STATES.running) {
-            switch (arg) {
+            switch (arg.toLowerCase()) {
             case 'end':
               runnerState = RUNNER_STATES.ended
 
@@ -129,8 +129,6 @@ export class Middleware {
           if (res.finished) {
             console.warn('WARHING: Response is finished! Did you really mean to `return next()` after finishing the response?')
           }
-
-          // return type === 'api' ? finalFunc(req, res) : finalFunc(context)
 
           const finalReturnFn = async () => {
             let finalReturn

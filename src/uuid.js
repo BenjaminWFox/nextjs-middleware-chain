@@ -1,7 +1,8 @@
 /**
- * This is really only used for testing.
+ * This will not create a cryptographic quality GUID, but is sufficient
+ * for identifying separate instances of `Middleware` if necessary.
  *
- * @returns a guid-like string that might not be quite as random as a true guid
+ * @returns a guid-like string
  */
 /* eslint-disable */
 export function uuidv4() {

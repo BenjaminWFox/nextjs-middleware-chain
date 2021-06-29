@@ -1,13 +1,4 @@
 import { createMiddleware } from '../../../src/index'
-// import { createMiddleware } from '../../../dist/main'
-// import { createMiddleware } from 'nextjs-middleware-chain'
-
-function uuidv4() {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-    var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
-    return v.toString(16);
-  });
-}
 
 const fnA = (req, res, next) => {
   console.log('Running A', next)
@@ -45,7 +36,7 @@ const decorate = (req, res, next) => {
   console.log('Running decoration...')
 
   req.nmc.hello = 'world'
-  req.nmc.secondId = uuidv4()
+  req.nmc.secondId = 'custom-added-id'
 
   return next()
 }
