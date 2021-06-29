@@ -277,7 +277,7 @@ describe('The `Middleware` runner short-circuit methods', () => {
     mwFactory = createMiddleware(goodMWFns)
   })
 
-  it('Should skip all remaining middleware AND Next.js route when a mw function returns `next("end")`', async () => {
+  it('Should skip all remaining middleware AND Next.js route when any mw function returns `next("end")`', async () => {
     const routeFn = jest.fn()
     const mwChain = mwFactory()
       .fnA()
@@ -297,7 +297,7 @@ describe('The `Middleware` runner short-circuit methods', () => {
     expect(routeFn).toHaveBeenCalledTimes(0)
   })
 
-  it('Should skip any remaining middleware when a mw function returns `next("route")`', async () => {
+  it('Should skip any remaining middleware when any mw function returns `next("route")`', async () => {
     const routeFn = jest.fn()
     const mwChain = mwFactory()
       .fnA()
@@ -320,10 +320,57 @@ describe('The `Middleware` runner short-circuit methods', () => {
 
 describe('Multi-method patterns', () => {
   describe('Multiple middlewares run in a single middleware', () => {
+    it('should run without errors', () => {
+      const mwFn1 = (req, res, next) => next()
+      const mwFn2 = (req, res, next) => next()
+      const mwFnCommon = (req, res, next) => {
+        const return1 = mwFn1(req, res, next)
+        const return2 = mwFn2(req, res, next)
 
+        expect(return1).toBe(true)
+        expect(return2).toBe(true)
+
+        return next()
+      }
+
+      const routeFn = jest.fn()
+
+      const mwFns = [mwFn1, mwFn2, mwFnCommon]
+      const mwFactory = createMiddleware(mwFns, { useAsyncMiddleware: false })
+      const runnableMiddleware = mwFactory().mwFnCommon().finish(routeFn)
+
+      runnableMiddleware({}, {})
+    })
   })
 
   describe('Multiple middlewares in a pre-built chain', () => {
+    it('Should allow further chaining off of a pre-built chain', () => {
+      const spyFn = jest.fn()
+      const mwFn1 = (req, res, next) => {
+        spyFn()
 
+        return next()
+      }
+      const mwFn2 = (req, res, next) => {
+        spyFn()
+
+        return next()
+      }
+      const routeFn = jest.fn()
+
+      const mwFns = [mwFn1, mwFn2]
+      const mwFactory = createMiddleware(mwFns, { useAsyncMiddleware: false })
+
+      const preBuiltChain = mwFactory().mwFn1()
+      const runnableMiddleware = preBuiltChain.mwFn2().finish(routeFn)
+
+      runnableMiddleware({}, {})
+
+      expect(spyFn).toBeCalledTimes(2)
+    })
   })
+})
+
+describe('The sync vs async behavior', () => {
+
 })
