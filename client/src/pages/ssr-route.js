@@ -1,5 +1,5 @@
 import Index from '../components/pages/index'
-import middleware from '../middleware'
+import middleware, { preBuiltChain } from '../middleware'
 import ssrImport from './api/ssrRoute/ssrImport'
 
 export default function Home() {
