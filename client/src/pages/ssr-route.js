@@ -1,5 +1,5 @@
 import Index from '../components/pages/index'
-import middleware, { preBuiltChain } from '../middleware'
+import middleware from '../middleware'
 import ssrImport from './api/ssrRoute/ssrImport'
 
 export default function Home() {
@@ -35,5 +35,5 @@ export const getServerSideProps = middleware()
   .finish(getProps, 'SSR Import')
 
 // export const getServerSideProps = preBuiltChain
-  // .fnD()
-  // .finish(getProps, 'SSR Import PreBuilt')
+// .fnD()
+// .finish(getProps, 'SSR Import PreBuilt')

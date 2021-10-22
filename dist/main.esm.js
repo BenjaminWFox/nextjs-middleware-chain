@@ -94,9 +94,10 @@ function _defineProperty(obj, key, value) {
 }
 
 /**
- * This is really only used for testing.
+ * This will not create a cryptographic quality GUID, but is sufficient
+ * for identifying separate instances of `Middleware` if necessary.
  *
- * @returns a guid-like string that might not be quite as random as a true guid
+ * @returns a guid-like string
  */
 
 /* eslint-disable */
@@ -120,15 +121,9 @@ var DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
-  onMiddlewareStart: function onMiddlewareStart(id) {
-    console.debug('onMiddlewareStart', id);
-  },
-  onMiddlewareComplete: function onMiddlewareComplete(id) {
-    console.debug('onMiddlewareComplete', id);
-  },
-  onRouteComplete: function onRouteComplete(id) {
-    console.debug('onRouteComplete', id);
-  }
+  onMiddlewareStart: function onMiddlewareStart() {},
+  onMiddlewareComplete: function onMiddlewareComplete() {},
+  onRouteComplete: function onRouteComplete() {}
 };
 var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
   var _this2 = this;
@@ -147,7 +142,9 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
       return !!fn;
     });
     var id = this.id;
-    return /*#__PURE__*/function () {
+    var friendlyName = finalFuncName || finalFunc.name;
+
+    var runnableMiddleware = /*#__PURE__*/function () {
       var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(pReq, pRes) {
         var type, res, req, context, runIndex, RUNNER_STATES, runnerState, runNext, result, finalReturnFn;
         return regeneratorRuntime.wrap(function _callee2$(_context2) {
@@ -170,10 +167,11 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   context = pReq;
                 }
 
-                req[DEFAULT_OPTIONS.reqPropName] = {
+                req[_this.options.reqPropName] = {
                   id: id,
-                  name: finalFuncName,
-                  type: type
+                  name: friendlyName,
+                  type: type,
+                  context: context
                 };
                 runIndex = 0;
                 RUNNER_STATES = {
@@ -194,12 +192,17 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                  */
 
                 runNext = function runNext(arg, payload) {
+                  var returnedArg = (arg === null || arg === void 0 ? void 0 : arg.toLowerCase()) || '';
+
                   if (RUNNER_STATES.running) {
-                    switch (arg) {
-                      case 'route':
+                    switch (returnedArg) {
                       case 'end':
                         runnerState = RUNNER_STATES.ended;
                         return payload;
+
+                      case 'route':
+                        runnerState = RUNNER_STATES.completed;
+                        return true;
 
                       default:
                         if (runIndex === _this.run.length - 1) {
@@ -213,11 +216,11 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   return false;
                 };
 
-                _this.options.onMiddlewareStart(_this.id);
+                _this.options.onMiddlewareStart(req);
 
               case 11:
                 if (!(runnerState === RUNNER_STATES.running && runIndex < _this.run.length)) {
-                  _context2.next = 29;
+                  _context2.next = 28;
                   break;
                 }
 
@@ -241,35 +244,33 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
               case 20:
                 if (!(!result || runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed || result.redirect)) {
-                  _context2.next = 26;
+                  _context2.next = 25;
                   break;
                 }
 
                 runnerState = RUNNER_STATES.ended; // Short-circuit-path exit of all middleware functionality
+                // console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)')
 
-                console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)');
+                _this.options.onMiddlewareComplete(req);
 
-                _this.options.onMiddlewareComplete(_this.id);
-
-                _this.options.onRouteComplete(_this.id);
+                _this.options.onRouteComplete(req);
 
                 return _context2.abrupt("return", result);
 
-              case 26:
+              case 25:
                 runIndex += 1;
                 _context2.next = 11;
                 break;
 
-              case 29:
+              case 28:
                 if (!(runnerState === RUNNER_STATES.completed)) {
-                  _context2.next = 34;
+                  _context2.next = 33;
                   break;
                 }
 
                 if (res.finished) {
                   console.warn('WARHING: Response is finished! Did you really mean to `return next()` after finishing the response?');
-                } // return type === 'api' ? finalFunc(req, res) : finalFunc(context)
-
+                }
 
                 finalReturnFn = /*#__PURE__*/function () {
                   var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
@@ -300,13 +301,12 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
                           case 9:
                             // Happy-path exit of all middleware functionality
-                            console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)');
-
-                            _this.options.onRouteComplete(_this.id);
+                            // console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+                            _this.options.onRouteComplete(req);
 
                             return _context.abrupt("return", finalReturn);
 
-                          case 12:
+                          case 11:
                           case "end":
                             return _context.stop();
                         }
@@ -319,21 +319,20 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   };
                 }();
 
-                _this.options.onMiddlewareComplete(_this.id);
+                _this.options.onMiddlewareComplete(req);
 
                 return _context2.abrupt("return", finalReturnFn());
 
-              case 34:
+              case 33:
                 // Unknown-path exit of all middleware functionality
-                console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)');
+                // console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+                _this.options.onMiddlewareComplete(req);
 
-                _this.options.onMiddlewareComplete(_this.id);
-
-                _this.options.onRouteComplete(_this.id);
+                _this.options.onRouteComplete(req);
 
                 return _context2.abrupt("return", undefined);
 
-              case 38:
+              case 36:
               case "end":
                 return _context2.stop();
             }
@@ -341,11 +340,13 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
         }, _callee2);
       }));
 
-      return function (_x, _x2) {
+      return function runnableMiddleware(_x, _x2) {
         return _ref.apply(this, arguments);
       };
     }();
-  }; // This will be run when there is not current instance of
+
+    return runnableMiddleware;
+  }; // This will be run when there is no existing instance of
   // middleware for a given route. Depending on whether
   // `useChainOrder` is true, functions will be added to the
   // end of the `run` array, or inserted into the `run` array
@@ -386,9 +387,12 @@ var middlewareFactoryFactory = function middlewareFactoryFactory(fnsArray, globa
   };
 };
 /**
- * This is run once on creation. It return a
- * @param {object} fnsArray       A collection of functions
- * @param {MiddlewareOptions} globalOptions  An object options
+ * This is run once on creation. It return a factory function that
+ * is, itself, a factory function for creating `Middleware` instances.
+ *
+ * @param {array}            functionsArray        A collection of functions
+ * @param {MiddlewareOptions} globalOptionsObject   An object options
+ *
  * @returns
  */
 
