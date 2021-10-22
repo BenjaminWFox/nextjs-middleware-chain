@@ -1,0 +1,9 @@
+{
+  "presets": [
+      "next/babel",
+      // Add your babel presets here
+   ],
+  "plugins": [
+      // Add your babel plugins here
+  ]
+}

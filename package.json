@@ -56,8 +56,5 @@
   },
   "dependencies": {
     "@babel/runtime": "^7.15.4"
-  },
-  "peerDependencies": {
-    "@babel/runtime": "^7.15.4"
   }
 }

@@ -2,100 +2,17 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
+var _asyncToGenerator = require('@babel/runtime/helpers/asyncToGenerator');
+var _defineProperty = require('@babel/runtime/helpers/defineProperty');
+var _classCallCheck = require('@babel/runtime/helpers/classCallCheck');
+var _regeneratorRuntime = require('@babel/runtime/regenerator');
 
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-    if (enumerableOnly) {
-      symbols = symbols.filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-      });
-    }
-
-    keys.push.apply(keys, symbols);
-  }
-
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i] != null ? arguments[i] : {};
-
-    if (i % 2) {
-      ownKeys(Object(source), true).forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
-    } else if (Object.getOwnPropertyDescriptors) {
-      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-    } else {
-      ownKeys(Object(source)).forEach(function (key) {
-        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-      });
-    }
-  }
-
-  return target;
-}
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
-
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
-
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
+var _asyncToGenerator__default = /*#__PURE__*/_interopDefaultLegacy(_asyncToGenerator);
+var _defineProperty__default = /*#__PURE__*/_interopDefaultLegacy(_defineProperty);
+var _classCallCheck__default = /*#__PURE__*/_interopDefaultLegacy(_classCallCheck);
+var _regeneratorRuntime__default = /*#__PURE__*/_interopDefaultLegacy(_regeneratorRuntime);
 
 /**
  * This will not create a cryptographic quality GUID, but is sufficient
@@ -114,6 +31,9 @@ function uuidv4() {
 }
 /* eslint-enable */
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty__default['default'](target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 /**
 * @typedef MiddlewareOptions
 * @type {object}
@@ -132,9 +52,9 @@ var DEFAULT_OPTIONS = {
 var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
   var _this2 = this;
 
-  _classCallCheck(this, Middleware);
+  _classCallCheck__default['default'](this, Middleware);
 
-  this.options = _objectSpread2(_objectSpread2(_objectSpread2({}, DEFAULT_OPTIONS), globalOptions), inlineOptions);
+  this.options = _objectSpread(_objectSpread(_objectSpread({}, DEFAULT_OPTIONS), globalOptions), inlineOptions);
   this.run = [];
   this.id = uuidv4();
 
@@ -149,9 +69,9 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
     var friendlyName = finalFuncName || finalFunc.name;
 
     var runnableMiddleware = /*#__PURE__*/function () {
-      var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(pReq, pRes) {
+      var _ref = _asyncToGenerator__default['default']( /*#__PURE__*/_regeneratorRuntime__default['default'].mark(function _callee2(pReq, pRes) {
         var type, res, req, context, runIndex, RUNNER_STATES, runnerState, runNext, result, finalReturnFn;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return _regeneratorRuntime__default['default'].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -277,9 +197,9 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                 }
 
                 finalReturnFn = /*#__PURE__*/function () {
-                  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+                  var _ref2 = _asyncToGenerator__default['default']( /*#__PURE__*/_regeneratorRuntime__default['default'].mark(function _callee() {
                     var finalReturn;
-                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                    return _regeneratorRuntime__default['default'].wrap(function _callee$(_context) {
                       while (1) {
                         switch (_context.prev = _context.next) {
                           case 0:
