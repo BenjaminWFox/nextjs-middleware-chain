@@ -1,5 +1,6 @@
 // rollup.config.js
 // import resolve from '@rollup/plugin-node-resolve'
+// import commonjs from '@rollup/plugin-commonjs'
 import babel from '@rollup/plugin-babel'
 
 export default {
@@ -14,8 +15,17 @@ export default {
       format: 'esm'
     }
   ],
+  // external: [/@babel\/runtime/],
   plugins: [
     // resolve(),
-    babel({ babelHelpers: 'bundled' })
+    // commonjs(),
+    babel(
+      {
+        babelHelpers: 'runtime',
+        plugins: [
+          '@babel/transform-runtime',
+        ]
+      }
+    )
   ]
 }
