@@ -2,105 +2,23 @@
 
 Object.defineProperty(exports, '__esModule', { value: true });
 
-function ownKeys(object, enumerableOnly) {
-  var keys = Object.keys(object);
+var _asyncToGenerator = require('@babel/runtime/helpers/asyncToGenerator');
+var _defineProperty = require('@babel/runtime/helpers/defineProperty');
+var _classCallCheck = require('@babel/runtime/helpers/classCallCheck');
+var _regeneratorRuntime = require('@babel/runtime/regenerator');
 
-  if (Object.getOwnPropertySymbols) {
-    var symbols = Object.getOwnPropertySymbols(object);
+function _interopDefaultLegacy (e) { return e && typeof e === 'object' && 'default' in e ? e : { 'default': e }; }
 
-    if (enumerableOnly) {
-      symbols = symbols.filter(function (sym) {
-        return Object.getOwnPropertyDescriptor(object, sym).enumerable;
-      });
-    }
-
-    keys.push.apply(keys, symbols);
-  }
-
-  return keys;
-}
-
-function _objectSpread2(target) {
-  for (var i = 1; i < arguments.length; i++) {
-    var source = arguments[i] != null ? arguments[i] : {};
-
-    if (i % 2) {
-      ownKeys(Object(source), true).forEach(function (key) {
-        _defineProperty(target, key, source[key]);
-      });
-    } else if (Object.getOwnPropertyDescriptors) {
-      Object.defineProperties(target, Object.getOwnPropertyDescriptors(source));
-    } else {
-      ownKeys(Object(source)).forEach(function (key) {
-        Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key));
-      });
-    }
-  }
-
-  return target;
-}
-
-function asyncGeneratorStep(gen, resolve, reject, _next, _throw, key, arg) {
-  try {
-    var info = gen[key](arg);
-    var value = info.value;
-  } catch (error) {
-    reject(error);
-    return;
-  }
-
-  if (info.done) {
-    resolve(value);
-  } else {
-    Promise.resolve(value).then(_next, _throw);
-  }
-}
-
-function _asyncToGenerator(fn) {
-  return function () {
-    var self = this,
-        args = arguments;
-    return new Promise(function (resolve, reject) {
-      var gen = fn.apply(self, args);
-
-      function _next(value) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "next", value);
-      }
-
-      function _throw(err) {
-        asyncGeneratorStep(gen, resolve, reject, _next, _throw, "throw", err);
-      }
-
-      _next(undefined);
-    });
-  };
-}
-
-function _classCallCheck(instance, Constructor) {
-  if (!(instance instanceof Constructor)) {
-    throw new TypeError("Cannot call a class as a function");
-  }
-}
-
-function _defineProperty(obj, key, value) {
-  if (key in obj) {
-    Object.defineProperty(obj, key, {
-      value: value,
-      enumerable: true,
-      configurable: true,
-      writable: true
-    });
-  } else {
-    obj[key] = value;
-  }
-
-  return obj;
-}
+var _asyncToGenerator__default = /*#__PURE__*/_interopDefaultLegacy(_asyncToGenerator);
+var _defineProperty__default = /*#__PURE__*/_interopDefaultLegacy(_defineProperty);
+var _classCallCheck__default = /*#__PURE__*/_interopDefaultLegacy(_classCallCheck);
+var _regeneratorRuntime__default = /*#__PURE__*/_interopDefaultLegacy(_regeneratorRuntime);
 
 /**
- * This is really only used for testing.
+ * This will not create a cryptographic quality GUID, but is sufficient
+ * for identifying separate instances of `Middleware` if necessary.
  *
- * @returns a guid-like string that might not be quite as random as a true guid
+ * @returns a guid-like string
  */
 
 /* eslint-disable */
@@ -113,6 +31,9 @@ function uuidv4() {
 }
 /* eslint-enable */
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) { symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); } keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty__default['default'](target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
 /**
 * @typedef MiddlewareOptions
 * @type {object}
@@ -124,22 +45,16 @@ var DEFAULT_OPTIONS = {
   useChainOrder: true,
   useAsyncMiddleware: true,
   reqPropName: 'nmc',
-  onMiddlewareStart: function onMiddlewareStart(id) {
-    console.debug('onMiddlewareStart', id);
-  },
-  onMiddlewareComplete: function onMiddlewareComplete(id) {
-    console.debug('onMiddlewareComplete', id);
-  },
-  onRouteComplete: function onRouteComplete(id) {
-    console.debug('onRouteComplete', id);
-  }
+  onMiddlewareStart: function onMiddlewareStart() {},
+  onMiddlewareComplete: function onMiddlewareComplete() {},
+  onRouteComplete: function onRouteComplete() {}
 };
 var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
   var _this2 = this;
 
-  _classCallCheck(this, Middleware);
+  _classCallCheck__default['default'](this, Middleware);
 
-  this.options = _objectSpread2(_objectSpread2(_objectSpread2({}, DEFAULT_OPTIONS), globalOptions), inlineOptions);
+  this.options = _objectSpread(_objectSpread(_objectSpread({}, DEFAULT_OPTIONS), globalOptions), inlineOptions);
   this.run = [];
   this.id = uuidv4();
 
@@ -151,10 +66,12 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
       return !!fn;
     });
     var id = this.id;
-    return /*#__PURE__*/function () {
-      var _ref = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee2(pReq, pRes) {
+    var friendlyName = finalFuncName || finalFunc.name;
+
+    var runnableMiddleware = /*#__PURE__*/function () {
+      var _ref = _asyncToGenerator__default['default']( /*#__PURE__*/_regeneratorRuntime__default['default'].mark(function _callee2(pReq, pRes) {
         var type, res, req, context, runIndex, RUNNER_STATES, runnerState, runNext, result, finalReturnFn;
-        return regeneratorRuntime.wrap(function _callee2$(_context2) {
+        return _regeneratorRuntime__default['default'].wrap(function _callee2$(_context2) {
           while (1) {
             switch (_context2.prev = _context2.next) {
               case 0:
@@ -174,10 +91,11 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   context = pReq;
                 }
 
-                req[DEFAULT_OPTIONS.reqPropName] = {
+                req[_this.options.reqPropName] = {
                   id: id,
-                  name: finalFuncName,
-                  type: type
+                  name: friendlyName,
+                  type: type,
+                  context: context
                 };
                 runIndex = 0;
                 RUNNER_STATES = {
@@ -198,12 +116,17 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                  */
 
                 runNext = function runNext(arg, payload) {
+                  var returnedArg = (arg === null || arg === void 0 ? void 0 : arg.toLowerCase()) || '';
+
                   if (RUNNER_STATES.running) {
-                    switch (arg) {
-                      case 'route':
+                    switch (returnedArg) {
                       case 'end':
                         runnerState = RUNNER_STATES.ended;
                         return payload;
+
+                      case 'route':
+                        runnerState = RUNNER_STATES.completed;
+                        return true;
 
                       default:
                         if (runIndex === _this.run.length - 1) {
@@ -217,11 +140,11 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   return false;
                 };
 
-                _this.options.onMiddlewareStart(_this.id);
+                _this.options.onMiddlewareStart(req);
 
               case 11:
                 if (!(runnerState === RUNNER_STATES.running && runIndex < _this.run.length)) {
-                  _context2.next = 29;
+                  _context2.next = 28;
                   break;
                 }
 
@@ -245,40 +168,38 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
               case 20:
                 if (!(!result || runnerState !== RUNNER_STATES.running && runnerState !== RUNNER_STATES.completed || result.redirect)) {
-                  _context2.next = 26;
+                  _context2.next = 25;
                   break;
                 }
 
                 runnerState = RUNNER_STATES.ended; // Short-circuit-path exit of all middleware functionality
+                // console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)')
 
-                console.debug('Short-circuit-path middleware exit (IMPLEMENT FINAL CALLBACK)');
+                _this.options.onMiddlewareComplete(req);
 
-                _this.options.onMiddlewareComplete(_this.id);
-
-                _this.options.onRouteComplete(_this.id);
+                _this.options.onRouteComplete(req);
 
                 return _context2.abrupt("return", result);
 
-              case 26:
+              case 25:
                 runIndex += 1;
                 _context2.next = 11;
                 break;
 
-              case 29:
+              case 28:
                 if (!(runnerState === RUNNER_STATES.completed)) {
-                  _context2.next = 34;
+                  _context2.next = 33;
                   break;
                 }
 
                 if (res.finished) {
                   console.warn('WARHING: Response is finished! Did you really mean to `return next()` after finishing the response?');
-                } // return type === 'api' ? finalFunc(req, res) : finalFunc(context)
-
+                }
 
                 finalReturnFn = /*#__PURE__*/function () {
-                  var _ref2 = _asyncToGenerator( /*#__PURE__*/regeneratorRuntime.mark(function _callee() {
+                  var _ref2 = _asyncToGenerator__default['default']( /*#__PURE__*/_regeneratorRuntime__default['default'].mark(function _callee() {
                     var finalReturn;
-                    return regeneratorRuntime.wrap(function _callee$(_context) {
+                    return _regeneratorRuntime__default['default'].wrap(function _callee$(_context) {
                       while (1) {
                         switch (_context.prev = _context.next) {
                           case 0:
@@ -304,13 +225,12 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
 
                           case 9:
                             // Happy-path exit of all middleware functionality
-                            console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)');
-
-                            _this.options.onRouteComplete(_this.id);
+                            // console.debug('Happy-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+                            _this.options.onRouteComplete(req);
 
                             return _context.abrupt("return", finalReturn);
 
-                          case 12:
+                          case 11:
                           case "end":
                             return _context.stop();
                         }
@@ -323,21 +243,20 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
                   };
                 }();
 
-                _this.options.onMiddlewareComplete(_this.id);
+                _this.options.onMiddlewareComplete(req);
 
                 return _context2.abrupt("return", finalReturnFn());
 
-              case 34:
+              case 33:
                 // Unknown-path exit of all middleware functionality
-                console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)');
+                // console.debig('Unknown-path middleware exit (IMPLEMENT FINAL CALLBACK)')
+                _this.options.onMiddlewareComplete(req);
 
-                _this.options.onMiddlewareComplete(_this.id);
-
-                _this.options.onRouteComplete(_this.id);
+                _this.options.onRouteComplete(req);
 
                 return _context2.abrupt("return", undefined);
 
-              case 38:
+              case 36:
               case "end":
                 return _context2.stop();
             }
@@ -345,11 +264,13 @@ var Middleware = function Middleware(fnsArray, globalOptions, inlineOptions) {
         }, _callee2);
       }));
 
-      return function (_x, _x2) {
+      return function runnableMiddleware(_x, _x2) {
         return _ref.apply(this, arguments);
       };
     }();
-  }; // This will be run when there is not current instance of
+
+    return runnableMiddleware;
+  }; // This will be run when there is no existing instance of
   // middleware for a given route. Depending on whether
   // `useChainOrder` is true, functions will be added to the
   // end of the `run` array, or inserted into the `run` array
@@ -390,9 +311,12 @@ var middlewareFactoryFactory = function middlewareFactoryFactory(fnsArray, globa
   };
 };
 /**
- * This is run once on creation. It return a
- * @param {object} fnsArray       A collection of functions
- * @param {MiddlewareOptions} globalOptions  An object options
+ * This is run once on creation. It return a factory function that
+ * is, itself, a factory function for creating `Middleware` instances.
+ *
+ * @param {array}            functionsArray        A collection of functions
+ * @param {MiddlewareOptions} globalOptionsObject   An object options
+ *
  * @returns
  */
 

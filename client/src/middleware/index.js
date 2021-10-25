@@ -1,4 +1,5 @@
-import { createMiddleware } from '../../../src/index'
+// import { createMiddleware } from '../../../src/index'
+import { createMiddleware } from 'nextjs-middleware-chain'
 
 const fnA = (req, res, next) => {
   console.log('Running A', next)
@@ -9,8 +10,8 @@ const fnA = (req, res, next) => {
 const fnB = async (req, res, next) => {
   console.log('Running B', next)
 
-  const result = await new Promise(resolve => setTimeout(resolve, 2000));
-  
+  const result = await new Promise((resolve) => setTimeout(resolve, 2000))
+
   return next('B')
 }
 
@@ -43,8 +44,9 @@ const decorate = (req, res, next) => {
 
 const unauthorized = (req, res, next) => {
   if (req.nmc.type === 'api') {
-    res.status(401).json({error: 'unauthorize', message: 'access denied'})
-  } else if (req.nmc.type === 'ssr') {
+    res.status(401).json({ error: 'unauthorize', message: 'access denied' })
+  }
+  else if (req.nmc.type === 'ssr') {
     return next('end', {
       redirect: {
         destination: '/',
@@ -62,9 +64,11 @@ const unauthorized = (req, res, next) => {
 
 const common = async (req, res, next) => {
   const aReturn = fnA(req, res, next)
+
   console.log('aRes', aReturn)
 
   const bReturn = await fnB(req, res, next)
+
   console.log('bRes', aReturn)
 
   const authReturn = unauthorized(req, res, next)
